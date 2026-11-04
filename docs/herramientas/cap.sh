@@ -8,6 +8,8 @@ set -u
 BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RAIZ="$(cd "$BASE/.." && pwd)"   # raiz del repositorio: los comandos corren desde ahi
 OUTDIR="$BASE/evidencia/salidas"
+export PATH="$RAIZ/.venv/Scripts:$PATH"   # python y pytest del entorno virtual del proyecto
+export PYTHONIOENCODING=utf-8 PYTHONWARNINGS=ignore MLFLOW_DISABLE_AGENT_HINT=1
 mkdir -p "$OUTDIR"
 name="$1"; shift
 file="$OUTDIR/$name.txt"

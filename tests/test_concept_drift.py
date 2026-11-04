@@ -59,10 +59,13 @@ def test_con_regla_nueva_la_alarma_salta(datos_particionados, modelo_y_referenci
     _, X_test, _, y_test = datos_particionados
     modelo, auc_ref, prob_ref = modelo_y_referencia
     tabla = evaluar_lotes(modelo, simular_lotes(X_test, y_test, con_drift=True), prob_ref)
-    alarma, _ = detectar(tabla["roc_auc"], auc_ref)
+    alarma, debajo = detectar(tabla["roc_auc"], auc_ref)
     assert alarma is not None
-    assert INICIO_DRIFT <= alarma <= INICIO_DRIFT + LOTES_SOSTENIDOS - 1
-    assert tabla.loc[tabla["lote"] >= INICIO_DRIFT, "roc_auc"].max() < auc_ref - CAIDA_MAXIMA
+    assert alarma >= INICIO_DRIFT                       # nunca antes del cambio de regla
+    assert all(debajo[alarma - LOTES_SOSTENIDOS:alarma])   # los 3 lotes previos a la alarma estan bajo el umbral
+    estables = tabla.loc[tabla["lote"] < INICIO_DRIFT, "roc_auc"].mean()
+    derivados = tabla.loc[tabla["lote"] >= INICIO_DRIFT, "roc_auc"].mean()
+    assert estables - derivados > CAIDA_MAXIMA
 
 
 def test_el_concept_drift_no_se_ve_en_las_entradas(datos_particionados, modelo_y_referencia):

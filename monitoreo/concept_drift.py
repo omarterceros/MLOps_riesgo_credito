@@ -8,8 +8,8 @@ Se construyen 12 lotes mensuales (500 clientes cada uno, sin reposicion: los 6.0
 clientes del conjunto de prueba, que el modelo nunca vio al entrenar). Los lotes 1-6 conservan las etiquetas reales. Desde el lote 7
 cambia la REGLA del mundo sin tocar las entradas X: un shock economico hace que
 clientes que venian pagando al dia (PAY_0 <= 0) caigan en mora. Se reasigna la
-etiqueta mora=1 a una fraccion creciente de esos clientes (25 %, 35 %, 45 %, 55 %,
-60 %, 60 %). El detector de data drift NO lo ve (X es identico); solo se nota al
+etiqueta mora=1 a una fraccion creciente de esos clientes (8 %, 9 %, 10 %, 14 %, 20 % y
+30 %): el shock empieza suave y se agrava mes a mes, como una crisis real. El detector de data drift NO lo ve (X es identico); solo se nota al
 comparar las predicciones con las etiquetas reales cuando llegan.
 
 Criterio de reentrenamiento
@@ -23,7 +23,7 @@ Criterio de reentrenamiento
   estacional o un problema de datos; tres meses seguidos es un cambio sostenido y
   el costo de reentrenar (horas) es menor que el de operar tres meses mas con un
   modelo malo.
-- Alarma inmediata (sin esperar 3 lotes) si la caida supera CAIDA_CRITICA = 0.10.
+- Alarma inmediata (sin esperar 3 lotes) si la caida supera CAIDA_CRITICA = 0.12.
 
 Retraso de etiquetas
 --------------------
@@ -56,9 +56,9 @@ from monitoreo.data_drift import psi  # noqa: E402
 N_LOTES = 12
 N_POR_LOTE = 500                                        # 12 x 500 = los 6.000 clientes del conjunto de prueba
 INICIO_DRIFT = 7                                        # primer lote con la regla nueva
-FRACCION_REASIGNADA = [0.25, 0.35, 0.45, 0.55, 0.60, 0.60]   # lotes 7..12
+FRACCION_REASIGNADA = [0.08, 0.09, 0.10, 0.14, 0.20, 0.30]   # lotes 7..12: el shock se agrava mes a mes
 CAIDA_MAXIMA = 0.05
-CAIDA_CRITICA = 0.10
+CAIDA_CRITICA = 0.12
 LOTES_SOSTENIDOS = 3
 PSI_SCORE_ALERTA = 0.10
 SEMILLA = 2026

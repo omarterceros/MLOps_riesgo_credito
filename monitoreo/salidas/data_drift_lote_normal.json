@@ -1,0 +1,236 @@
+{
+  "lote": "monitoreo/lotes/lote_normal.csv",
+  "estado": "verde",
+  "variables": [
+    {
+      "variable": "LIMIT_BAL",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.028166666666666673,
+      "p_valor": 0.20861549497382093,
+      "psi": 0.006039741318632148,
+      "estado": "verde",
+      "detalle": "media 167,365 -> 166,640"
+    },
+    {
+      "variable": "SEX",
+      "tipo": "categorica",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.0062844012641160045,
+      "p_valor": 0.31560115643597797,
+      "psi": 0.0007488730792814278,
+      "estado": "verde",
+      "detalle": "moda 2 (60%) -> 2 (59%)"
+    },
+    {
+      "variable": "EDUCATION",
+      "tipo": "categorica",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.003943945113956206,
+      "p_valor": 0.9409346989123204,
+      "psi": 0.00028449846224326715,
+      "estado": "verde",
+      "detalle": "moda 2 (47%) -> 2 (47%)"
+    },
+    {
+      "variable": "MARRIAGE",
+      "tipo": "categorica",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.0060757037166398195,
+      "p_valor": 0.8154486618833011,
+      "psi": 0.0006334967374715712,
+      "estado": "verde",
+      "detalle": "moda 2 (53%) -> 2 (52%)"
+    },
+    {
+      "variable": "AGE",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.04191666666666671,
+      "p_valor": 0.013599046182852521,
+      "psi": 0.010696999606187599,
+      "estado": "verde",
+      "detalle": "media 35 -> 36"
+    },
+    {
+      "variable": "PAY_0",
+      "tipo": "ordinal",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.02281914937763472,
+      "p_valor": 0.03882483642268665,
+      "psi": 0.008305652519278844,
+      "estado": "verde",
+      "detalle": "moda 0 (49%) -> 0 (50%)"
+    },
+    {
+      "variable": "PAY_2",
+      "tipo": "ordinal",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.011082691953851502,
+      "p_valor": 0.6796337284520785,
+      "psi": 0.002212906788344147,
+      "estado": "verde",
+      "detalle": "moda 0 (52%) -> 0 (53%)"
+    },
+    {
+      "variable": "PAY_3",
+      "tipo": "ordinal",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.01487366195182089,
+      "p_valor": 0.227588960639229,
+      "psi": 0.0036911376864940735,
+      "estado": "verde",
+      "detalle": "moda 0 (53%) -> 0 (53%)"
+    },
+    {
+      "variable": "PAY_4",
+      "tipo": "ordinal",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.01634317109124089,
+      "p_valor": 0.14621778546386419,
+      "psi": 0.004326912100973046,
+      "estado": "verde",
+      "detalle": "moda 0 (55%) -> 0 (55%)"
+    },
+    {
+      "variable": "PAY_5",
+      "tipo": "ordinal",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.017689402866284887,
+      "p_valor": 0.09233823661032838,
+      "psi": 0.005538355538482816,
+      "estado": "verde",
+      "detalle": "moda 0 (56%) -> 0 (57%)"
+    },
+    {
+      "variable": "PAY_6",
+      "tipo": "ordinal",
+      "prueba": "chi2 + PSI",
+      "estadistico": 0.018087632912639026,
+      "p_valor": 0.07980308061816409,
+      "psi": 0.005965930060772098,
+      "estado": "verde",
+      "detalle": "moda 0 (54%) -> 0 (56%)"
+    },
+    {
+      "variable": "BILL_AMT1",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.03137500000000004,
+      "p_valor": 0.12147014525709221,
+      "psi": 0.008566549727311036,
+      "estado": "verde",
+      "detalle": "media 51,101 -> 53,296"
+    },
+    {
+      "variable": "BILL_AMT2",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.0375833333333333,
+      "p_valor": 0.03609981612972191,
+      "psi": 0.005381138953448234,
+      "estado": "verde",
+      "detalle": "media 49,012 -> 52,220"
+    },
+    {
+      "variable": "BILL_AMT3",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.0382083333333334,
+      "p_valor": 0.031564586918663706,
+      "psi": 0.007688296433038951,
+      "estado": "verde",
+      "detalle": "media 46,862 -> 49,793"
+    },
+    {
+      "variable": "BILL_AMT4",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.03933333333333333,
+      "p_valor": 0.024650841275925983,
+      "psi": 0.007908046157672767,
+      "estado": "verde",
+      "detalle": "media 43,157 -> 45,474"
+    },
+    {
+      "variable": "BILL_AMT5",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.028166666666666645,
+      "p_valor": 0.20861549497382192,
+      "psi": 0.0042654670936246005,
+      "estado": "verde",
+      "detalle": "media 40,164 -> 42,007"
+    },
+    {
+      "variable": "BILL_AMT6",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.03570833333333334,
+      "p_valor": 0.05329148394527161,
+      "psi": 0.005823018839183893,
+      "estado": "verde",
+      "detalle": "media 38,676 -> 40,813"
+    },
+    {
+      "variable": "PAY_AMT1",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.033291666666666664,
+      "p_valor": 0.08549073289860776,
+      "psi": 0.005753467683600676,
+      "estado": "verde",
+      "detalle": "media 5,624 -> 6,139"
+    },
+    {
+      "variable": "PAY_AMT2",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.01579166666666665,
+      "p_valor": 0.867238097136658,
+      "psi": 0.004805180192100573,
+      "estado": "verde",
+      "detalle": "media 5,880 -> 6,654"
+    },
+    {
+      "variable": "PAY_AMT3",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.025749999999999995,
+      "p_valor": 0.30121272318116266,
+      "psi": 0.0050461139968971495,
+      "estado": "verde",
+      "detalle": "media 5,216 -> 5,162"
+    },
+    {
+      "variable": "PAY_AMT4",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.036666666666666625,
+      "p_valor": 0.04378061502042596,
+      "psi": 0.009948393921218594,
+      "estado": "verde",
+      "detalle": "media 4,790 -> 4,099"
+    },
+    {
+      "variable": "PAY_AMT5",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.026749999999999996,
+      "p_valor": 0.25985199393409864,
+      "psi": 0.001883224054430329,
+      "estado": "verde",
+      "detalle": "media 4,770 -> 4,369"
+    },
+    {
+      "variable": "PAY_AMT6",
+      "tipo": "numerica",
+      "prueba": "KS + PSI",
+      "estadistico": 0.035999999999999976,
+      "p_valor": 0.05022418589264033,
+      "psi": 0.010409030308874363,
+      "estado": "verde",
+      "detalle": "media 5,230 -> 5,539"
+    }
+  ]
+}

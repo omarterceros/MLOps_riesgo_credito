@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "run_id": "f8dfebea1f6846ae8d62e0aca7711214",
+  "run_name": "hgb_lr0.1_400it_prof4",
+  "roc_auc_referencia": 0.779741838143766,
+  "alarma_en_lote": 9,
+  "caida_maxima": 0.05,
+  "lotes_sostenidos": 3
+}

@@ -105,6 +105,7 @@ def main(tracking_uri: str) -> None:
     print(f"Modelo registrado: '{NOMBRE_REGISTRO}'")
     print(f"{'version':>8}  {'alias':<9} {'run_name':<24} {'roc_auc':>8}  run_id")
     for mv in sorted(cliente.search_model_versions(f"name='{NOMBRE_REGISTRO}'"), key=lambda v: int(v.version)):
+        mv = cliente.get_model_version(NOMBRE_REGISTRO, mv.version)   # search no trae los alias; get si
         alias = ", ".join(mv.aliases) if mv.aliases else "-"
         print(f"{mv.version:>8}  {alias:<9} {mv.tags.get('run_name', ''):<24} {mv.tags.get('roc_auc', ''):>8}  {mv.run_id}")
     print(f"\nEl servicio consume: {desplegado['uri']}  ->  version {v_prod.version}, run {mejor.info.run_id}")
