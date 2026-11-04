@@ -13,6 +13,19 @@ ajustable, no con la etiqueta dura; AUC no depende del umbral y permite comparar
 
 ## 2. Vista general
 
+![Arquitectura general](docs/diagramas/01-arquitectura.png)
+
+Cómo leerlo: la zona superior es la máquina anfitriona (datos, entrenamiento, el servidor de
+MLflow con tracking + registry + UI, y el monitoreo); la inferior es el clúster de Kubernetes. Las
+flechas sólidas son flujo de datos o de peticiones; las punteadas son lecturas o escrituras del
+Model Registry. `entrenar.py` envía los runs al servidor; `registrar.py` lee el mejor run, aplica
+la compuerta de calidad y escribe el alias `champion`. La imagen Docker no contiene el modelo:
+cada pod del Deployment lo carga por alias desde `host.docker.internal:5050` al arrancar, y hasta
+entonces no recibe tráfico. El Service de la API (NodePort 30080) balancea entre los pods Ready; la
+interfaz (nginx) hace proxy de `/api/` a ese Service por DNS interno y se expone en el NodePort
+30081. Cada respuesta trae el pod que atendió y la versión y run_id del modelo: la trazabilidad
+cruza las dos zonas. El mismo diagrama, en texto:
+
 ```
              entrena / compara / registra                      consume por alias
   ┌──────────────┐    HTTP :5050    ┌────────────────────┐   models:/riesgo-credito@champion
