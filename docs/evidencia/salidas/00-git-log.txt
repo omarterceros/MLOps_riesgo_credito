@@ -1,4 +1,5 @@
 $ git log --oneline --date=short --format="%h %ad %s"
+bcb1e84 2026-11-04 docs: enlace al repositorio publicado
 2c8862c 2026-11-04 docs: precisar la estrategia de datos del reentrenamiento según la forma del concept drift
 4b7fb3d 2026-11-04 docs: informe regenerado y registro de commits actualizado
 6b2de67 2026-11-04 docs: con qué datos se reentrena según el tipo de drift (data drift: viejos más nuevos; concept drift: según la forma del cambio)

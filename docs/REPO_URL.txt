@@ -1,1 +1,1 @@
-﻿https://github.com/omarterceros/riesgo-credito-mlops
+https://github.com/omarterceros/MLOps_riesgo_credito
