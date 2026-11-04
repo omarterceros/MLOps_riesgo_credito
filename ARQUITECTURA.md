@@ -164,7 +164,8 @@ si el cambio es un corte limpio, se entrena con los lotes de la regla nueva; si 
 una ventana deslizante reentrenada cada mes y más peso a lo reciente; si es estacional, el modelo
 viejo sigue sirviendo para su temporada (un modelo por régimen o variables de estacionalidad).
 En este proyecto el challenger se entrena con los lotes recientes ya etiquetados: la simulación
-es un cambio de regla desde el lote 7 que se agrava mes a mes.
+es un cambio de regla desde el lote 7 que se agrava mes a mes; como sigue agravándose, en
+producción sería la ventana deslizante mensual con más peso a lo reciente.
 
 **Estrategias de despliegue.** El Deployment usa rolling update con `maxSurge: 1` y
 `maxUnavailable: 0`: nunca hay menos de 3 pods listos y, si la versión nueva no carga, los
@@ -185,8 +186,8 @@ Negocio (¿genera valor?): tasa de mora real de la cartera aprobada y pérdida e
 umbral de decisión (`UMBRAL_MORA`, hoy 0.5 provisional) y el reentrenamiento; no se implementó
 porque el dataset no trae montos de pérdida.
 
-**Tipo de drift y frecuencia.** El escenario simulado es gradual (una crisis que se agrava mes a
-mes); el corte de 0.12 en un solo lote cubre un drift súbito y la regla de 3 lotes filtra un mes
+**Tipo de drift y frecuencia.** El escenario simulado empieza de golpe en el lote 7 (cambio de regla)
+y después se agrava de forma gradual mes a mes (8 % → 30 %); el corte de 0.12 en un solo lote cubre un drift súbito y la regla de 3 lotes filtra un mes
 estacional. Con datos de tarjeta que llegan mensualmente, la evaluación y el posible
 reentrenamiento son mensuales.
 
