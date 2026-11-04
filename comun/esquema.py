@@ -1,9 +1,9 @@
 """Esquema de las variables de entrada del modelo de riesgo crediticio.
 
 Dataset: "Default of Credit Card Clients" (Yeh & Lien, 2009), UCI Machine Learning
-Repository, publicado en OpenML con id 42477. 30.000 clientes de tarjetas de credito
-de Taiwan y 23 variables de entrada. Objetivo: `mora` = 1 si el cliente no pago el
-mes siguiente (default payment next month).
+Repository id 350, descargado de Kaggle (uciml/default-of-credit-card-clients-dataset).
+30.000 clientes de tarjetas de credito de Taiwan y 23 variables de entrada. Objetivo:
+`mora` = 1 si el cliente no pago el mes siguiente (default.payment.next.month).
 
 Este archivo es la UNICA fuente de verdad sobre las columnas: lo usan el
 entrenamiento, el servicio de inferencia, la UI y las pruebas de drift.

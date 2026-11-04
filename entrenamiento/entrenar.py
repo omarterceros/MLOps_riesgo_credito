@@ -126,7 +126,7 @@ def entrenar_todo(tracking_uri: str) -> pd.DataFrame:
             # --- Que se registra en el run ---
             mlflow.log_input(dataset_train, context="training")
             mlflow.set_tags({
-                "dataset": "UCI default of credit card clients (OpenML 42477)",
+                "dataset": "UCI default of credit card clients (Kaggle uciml/default-of-credit-card-clients-dataset)",
                 "datos_md5": huella,
                 "familia": familia,
                 "metrica_principal": "roc_auc",

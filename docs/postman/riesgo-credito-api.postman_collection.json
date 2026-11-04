@@ -1,0 +1,121 @@
+{
+  "info": {
+    "name": "riesgo-credito-api",
+    "description": "Pruebas de la API de riesgo crediticio desplegada en Kubernetes (Service NodePort 30080). Cambiar {{base_url}} a http://localhost:8000 para probar el contenedor suelto (docker run -p 8000:8000).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:30080" }
+  ],
+  "item": [
+    {
+      "name": "1. health (readiness: 200 solo con el modelo cargado)",
+      "request": { "method": "GET", "url": "{{base_url}}/health" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 OK', () => pm.response.to.have.status(200));",
+        "const r = pm.response.json();",
+        "pm.test('modelo cargado desde el registry', () => { pm.expect(r.status).to.eql('ok'); pm.expect(r.modelo.alias).to.eql('champion'); pm.expect(r.modelo.version).to.be.a('number'); });",
+        "console.log('pod:', r.pod, '| version:', r.modelo.version, '| run:', r.modelo.run_id);"
+      ], "type": "text/javascript" } }]
+    },
+    {
+      "name": "2. vivo (liveness)",
+      "request": { "method": "GET", "url": "{{base_url}}/vivo" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 OK', () => pm.response.to.have.status(200));"
+      ], "type": "text/javascript" } }]
+    },
+    {
+      "name": "3. info (trazabilidad: version y run del modelo que sirve el pod)",
+      "request": { "method": "GET", "url": "{{base_url}}/info" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 OK', () => pm.response.to.have.status(200));",
+        "const r = pm.response.json();",
+        "pm.test('consume models:/riesgo-credito@champion', () => pm.expect(r.modelo.uri).to.eql('models:/riesgo-credito@champion'));",
+        "pm.test('trae run_id (32 hex)', () => pm.expect(r.modelo.run_id).to.match(/^[0-9a-f]{32}$/));"
+      ], "type": "text/javascript" } }]
+    },
+    {
+      "name": "4. esquema (las 23 variables y los ejemplos)",
+      "request": { "method": "GET", "url": "{{base_url}}/esquema" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 OK', () => pm.response.to.have.status(200));",
+        "pm.test('23 columnas', () => pm.expect(pm.response.json().columnas.length).to.eql(23));"
+      ], "type": "text/javascript" } }]
+    },
+    {
+      "name": "5. predecir: bajo riesgo (paga al dia, limite alto)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/predecir",
+        "body": { "mode": "raw", "raw": "{\n  \"LIMIT_BAL\": 200000, \"SEX\": 2, \"EDUCATION\": 1, \"MARRIAGE\": 2, \"AGE\": 35,\n  \"PAY_0\": -1, \"PAY_2\": -1, \"PAY_3\": -1, \"PAY_4\": -1, \"PAY_5\": -1, \"PAY_6\": -1,\n  \"BILL_AMT1\": 3000, \"BILL_AMT2\": 2500, \"BILL_AMT3\": 2800, \"BILL_AMT4\": 2600, \"BILL_AMT5\": 2400, \"BILL_AMT6\": 2200,\n  \"PAY_AMT1\": 3000, \"PAY_AMT2\": 2500, \"PAY_AMT3\": 2800, \"PAY_AMT4\": 2600, \"PAY_AMT5\": 2400, \"PAY_AMT6\": 2200\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 OK', () => pm.response.to.have.status(200));",
+        "const r = pm.response.json();",
+        "pm.test('sin mora y probabilidad baja', () => { pm.expect(r.mora).to.eql(0); pm.expect(r.probabilidad_mora).to.be.below(0.5); });",
+        "pm.test('dice que pod atendio y que version/run uso', () => { pm.expect(r.pod).to.be.a('string'); pm.expect(r.modelo.version).to.be.a('number'); pm.expect(r.modelo.run_id).to.be.a('string'); });",
+        "console.log('pod:', r.pod, '| probabilidad:', r.probabilidad_mora);"
+      ], "type": "text/javascript" } }]
+    },
+    {
+      "name": "6. predecir: alto riesgo (tres meses de atraso, no paga)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/predecir",
+        "body": { "mode": "raw", "raw": "{\n  \"LIMIT_BAL\": 20000, \"SEX\": 1, \"EDUCATION\": 3, \"MARRIAGE\": 1, \"AGE\": 45,\n  \"PAY_0\": 3, \"PAY_2\": 2, \"PAY_3\": 2, \"PAY_4\": 2, \"PAY_5\": 2, \"PAY_6\": 2,\n  \"BILL_AMT1\": 19500, \"BILL_AMT2\": 19000, \"BILL_AMT3\": 18800, \"BILL_AMT4\": 18500, \"BILL_AMT5\": 18200, \"BILL_AMT6\": 18000,\n  \"PAY_AMT1\": 0, \"PAY_AMT2\": 0, \"PAY_AMT3\": 500, \"PAY_AMT4\": 0, \"PAY_AMT5\": 0, \"PAY_AMT6\": 0\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 OK', () => pm.response.to.have.status(200));",
+        "const r = pm.response.json();",
+        "pm.test('mora y probabilidad alta', () => { pm.expect(r.mora).to.eql(1); pm.expect(r.probabilidad_mora).to.be.above(0.5); });",
+        "console.log('pod:', r.pod, '| probabilidad:', r.probabilidad_mora);"
+      ], "type": "text/javascript" } }]
+    },
+    {
+      "name": "7. predecir: entrada invalida (SEX=3, AGE=10) -> 422",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/predecir",
+        "body": { "mode": "raw", "raw": "{\n  \"LIMIT_BAL\": 200000, \"SEX\": 3, \"EDUCATION\": 1, \"MARRIAGE\": 2, \"AGE\": 10,\n  \"PAY_0\": -1, \"PAY_2\": -1, \"PAY_3\": -1, \"PAY_4\": -1, \"PAY_5\": -1, \"PAY_6\": -1,\n  \"BILL_AMT1\": 3000, \"BILL_AMT2\": 2500, \"BILL_AMT3\": 2800, \"BILL_AMT4\": 2600, \"BILL_AMT5\": 2400, \"BILL_AMT6\": 2200,\n  \"PAY_AMT1\": 3000, \"PAY_AMT2\": 2500, \"PAY_AMT3\": 2800, \"PAY_AMT4\": 2600, \"PAY_AMT5\": 2400, \"PAY_AMT6\": 2200\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('422 Unprocessable Entity (validacion Pydantic)', () => pm.response.to.have.status(422));",
+        "const campos = pm.response.json().detail.map(e => e.loc[e.loc.length - 1]);",
+        "pm.test('rechaza SEX y AGE', () => { pm.expect(campos).to.include('SEX'); pm.expect(campos).to.include('AGE'); });"
+      ], "type": "text/javascript" } }]
+    },
+    {
+      "name": "8. predecir: falta un campo (LIMIT_BAL) -> 422",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/predecir",
+        "body": { "mode": "raw", "raw": "{\n  \"SEX\": 2, \"EDUCATION\": 1, \"MARRIAGE\": 2, \"AGE\": 35,\n  \"PAY_0\": -1, \"PAY_2\": -1, \"PAY_3\": -1, \"PAY_4\": -1, \"PAY_5\": -1, \"PAY_6\": -1,\n  \"BILL_AMT1\": 3000, \"BILL_AMT2\": 2500, \"BILL_AMT3\": 2800, \"BILL_AMT4\": 2600, \"BILL_AMT5\": 2400, \"BILL_AMT6\": 2200,\n  \"PAY_AMT1\": 3000, \"PAY_AMT2\": 2500, \"PAY_AMT3\": 2800, \"PAY_AMT4\": 2600, \"PAY_AMT5\": 2400, \"PAY_AMT6\": 2200\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('422: campo obligatorio ausente', () => pm.response.to.have.status(422));"
+      ], "type": "text/javascript" } }]
+    },
+    {
+      "name": "9. balanceo: repetir con el Runner (10 iteraciones) y mirar la consola: pods distintos",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Connection", "value": "close" }],
+        "url": "{{base_url}}/predecir",
+        "body": { "mode": "raw", "raw": "{\n  \"LIMIT_BAL\": 200000, \"SEX\": 2, \"EDUCATION\": 1, \"MARRIAGE\": 2, \"AGE\": 35,\n  \"PAY_0\": -1, \"PAY_2\": -1, \"PAY_3\": -1, \"PAY_4\": -1, \"PAY_5\": -1, \"PAY_6\": -1,\n  \"BILL_AMT1\": 3000, \"BILL_AMT2\": 2500, \"BILL_AMT3\": 2800, \"BILL_AMT4\": 2600, \"BILL_AMT5\": 2400, \"BILL_AMT6\": 2200,\n  \"PAY_AMT1\": 3000, \"PAY_AMT2\": 2500, \"PAY_AMT3\": 2800, \"PAY_AMT4\": 2600, \"PAY_AMT5\": 2400, \"PAY_AMT6\": 2200\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 OK', () => pm.response.to.have.status(200));",
+        "const pod = pm.response.json().pod;",
+        "const vistos = JSON.parse(pm.collectionVariables.get('pods_vistos') || '{}');",
+        "vistos[pod] = (vistos[pod] || 0) + 1;",
+        "pm.collectionVariables.set('pods_vistos', JSON.stringify(vistos));",
+        "console.log('atendio:', pod, '| acumulado:', JSON.stringify(vistos));"
+      ], "type": "text/javascript" } }]
+    }
+  ]
+}

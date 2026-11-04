@@ -6,7 +6,8 @@ Proyecto `riesgo-credito-mlops` · Módulo ML-Ops y Puesta en Producción · Oma
 
 Clasificación binaria: ¿el cliente de tarjeta de crédito entrará en mora el mes siguiente?
 Dataset público UCI *Default of Credit Card Clients* (30.000 filas, 23 variables de entrada,
-22,1 % de mora). La métrica principal es **roc_auc**: la clase positiva es minoritaria y la
+22,1 % de mora), descargado de Kaggle (`uciml/default-of-credit-card-clients-dataset`) y
+convertido al esquema del proyecto por `datos/descargar.py`. La métrica principal es **roc_auc**: la clase positiva es minoritaria y la
 decisión de negocio (aprobar, pedir garantía, rechazar) se toma con la probabilidad y un umbral
 ajustable, no con la etiqueta dura; AUC no depende del umbral y permite comparar modelos entre sí.
 

@@ -20,12 +20,14 @@ las evidencias (capturas y registros de terminal) está en `docs/`.
 
 ## Datos
 
-*Default of Credit Card Clients* (Yeh & Lien, 2009), UCI Machine Learning Repository, publicado
-en OpenML con id 42477: 30.000 clientes, 23 variables de entrada (límite de crédito, edad, sexo,
-educación, estado civil, historial de pago de 6 meses, montos facturados y pagados) y la variable
-objetivo `mora` (22,1 % de positivos). `datos/descargar.py` lo baja y lo guarda como
-`datos/credito.csv` (MD5 `a4963930271a5ae46fb801ca0cba130b`); el archivo está versionado en el repositorio para que
-el entrenamiento sea reproducible sin red.
+*Default of Credit Card Clients* (Yeh & Lien, 2009), UCI Machine Learning Repository id 350,
+descargado de Kaggle: https://www.kaggle.com/datasets/uciml/default-of-credit-card-clients-dataset
+(archivo `UCI_Credit_Card.csv`). 30.000 clientes, 23 variables de entrada (límite de crédito, edad,
+sexo, educación, estado civil, historial de pago de 6 meses, montos facturados y pagados) y la
+variable objetivo `mora` (22,1 % de positivos). `datos/descargar.py` convierte el CSV de Kaggle al
+esquema del proyecto (quita la columna `ID` y renombra `default.payment.next.month` a `mora`) y
+lo guarda como `datos/credito.csv` (MD5 `a4963930271a5ae46fb801ca0cba130b`); ese archivo está
+versionado en el repositorio para que el entrenamiento sea reproducible sin descargar nada.
 
 División train/test: 80/20 estratificada por `mora`, semilla 42 (`comun/datos.py`). La misma
 partición la usan el entrenamiento, el baseline del data drift y los lotes de concept drift.
@@ -89,6 +91,19 @@ riesgo-credito-mlops/
 ├── scripts/          mlflow_server · entrenar_y_registrar · desplegar_k8s · demo_balanceo
 └── docs/             informe (Word), evidencia (capturas y salidas de terminal), herramientas
 ```
+
+## Probar la API
+
+Tres formas, todas contra el servicio desplegado en Kubernetes (`http://localhost:30080`) o contra el
+contenedor suelto (`http://localhost:8000`):
+
+- **Swagger** (viene con FastAPI): http://localhost:30080/docs → elegir `POST /predecir` → *Try it out*
+  → *Execute*. Muestra la petición, la respuesta y el código HTTP.
+- **Postman**: importar `docs/postman/riesgo-credito-api.postman_collection.json` (File → Import). Trae 9
+  peticiones con pruebas automáticas (`Tests`): health, vivo, info, esquema, predicción de bajo y alto
+  riesgo, dos entradas inválidas (422) y una para repetir con el *Runner* y ver en la consola qué pod
+  atendió cada vez. La variable `base_url` se cambia en la colección.
+- **curl / scripts**: `scripts/demo_balanceo.sh 12` y los comandos de `docs/evidencia/salidas/*.txt`.
 
 ## Demostraciones de Kubernetes (fase 3)
 

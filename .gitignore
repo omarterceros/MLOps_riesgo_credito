@@ -7,3 +7,6 @@ mlruns/
 docs/herramientas/node_modules/
 docs/evidencia/capturas/*.html
 *.zip
+
+# archivo crudo de Kaggle (datos/credito.csv es la version convertida y versionada)
+datos/UCI_Credit_Card.csv
