@@ -1,0 +1,14 @@
+# Punto de entrada estable: reparte las peticiones entre los pods con la etiqueta app=riesgo-credito-api.
+apiVersion: v1
+kind: Service
+metadata:
+  name: riesgo-credito-api
+  namespace: riesgo-credito
+spec:
+  type: NodePort
+  selector:
+    app: riesgo-credito-api
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30080     # http://localhost:30080 en Docker Desktop

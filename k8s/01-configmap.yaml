@@ -1,0 +1,13 @@
+# Configuracion del servicio: de donde toma el modelo.
+# host.docker.internal es la maquina anfitriona vista desde el Kubernetes de Docker Desktop,
+# donde corre el servidor de MLflow (scripts/mlflow_server.ps1).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: riesgo-credito
+data:
+  MLFLOW_TRACKING_URI: "http://host.docker.internal:5050"
+  MODELO_NOMBRE: "riesgo-credito"
+  MODELO_ALIAS: "champion"
+  UMBRAL_MORA: "0.5"

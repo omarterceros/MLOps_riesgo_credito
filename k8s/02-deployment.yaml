@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: riesgo-credito-api
+  namespace: riesgo-credito
+  labels:
+    app: riesgo-credito-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: riesgo-credito-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1          # durante una actualizacion puede haber un pod extra...
+      maxUnavailable: 0    # ...pero nunca menos de los 3 declarados
+  template:
+    metadata:
+      labels:
+        app: riesgo-credito-api
+    spec:
+      containers:
+        - name: api
+          image: riesgo-credito-api:1.0
+          imagePullPolicy: IfNotPresent   # imagen construida localmente (Docker Desktop comparte el daemon)
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: api-config
+          env:
+            - name: POD_NAME              # cada respuesta dice que pod la atendio
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:                 # recibe trafico solo cuando el modelo ya esta cargado
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 90
+            periodSeconds: 20
+            failureThreshold: 3
