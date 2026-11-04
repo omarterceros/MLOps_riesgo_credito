@@ -1,4 +1,8 @@
 $ git log --oneline --date=short --format="%h %ad %s"
+fd47533 2026-11-04 docs(evidencia): capturas de terminal con la ventana real de Git Bash (MINGW64) en Windows 11 y nota de como se tomaron
+82b107c 2026-11-04 docs: lectura guiada del diagrama de arquitectura en ARQUITECTURA.md y en el informe
+bb0d19d 2026-11-04 feat(datos): el dataset se toma de Kaggle (UCI_Credit_Card.csv) y se convierte al esquema del proyecto; coleccion de Postman para probar la API
+112be22 2026-11-04 docs: informe final y registro de commits
 6f30fe4 2026-11-04 docs: diagramas en draw.io/SVG/PNG (arquitectura, ciclo de vida, monitoreo, Kubernetes) en el informe
 037a772 2026-11-04 docs(evidencia): validacion de datos, compuerta de calidad e informe regenerado
 2863ce1 2026-11-04 docs: validacion de datos antes del drift y respuestas de la clase 7 en la arquitectura
