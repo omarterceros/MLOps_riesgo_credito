@@ -28,11 +28,11 @@ def test_health_ok_con_modelo_cargado(cliente):
     assert r.json()["modelo"]["version"] == 2
 
 
-def test_health_503_sin_modelo():
+def test_health_503_sin_modelo_pero_vivo_200():
     api.estado.update(modelo=None, error="sin conexion")
     with TestClient(api.app) as c:
-        r = c.get("/health")
-    assert r.status_code == 503
+        assert c.get("/health").status_code == 503    # readiness: fuera del Service
+        assert c.get("/vivo").status_code == 200      # liveness: no hay que reiniciar el pod
 
 
 def test_predecir_bajo_riesgo(cliente):

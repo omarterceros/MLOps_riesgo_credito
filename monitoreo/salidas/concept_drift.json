@@ -5,5 +5,17 @@
   "roc_auc_referencia": 0.779741838143766,
   "alarma_en_lote": 9,
   "caida_maxima": 0.05,
-  "lotes_sostenidos": 3
+  "caida_critica": 0.12,
+  "lotes_sostenidos": 3,
+  "n_lotes": 12,
+  "n_por_lote": 500,
+  "inicio_drift": 7,
+  "fraccion_reasignada": [
+    0.08,
+    0.09,
+    0.1,
+    0.14,
+    0.2,
+    0.3
+  ]
 }

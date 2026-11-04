@@ -36,13 +36,9 @@ bash "$CAP" 06-k8s-replicas-running \
 bash "$CAP" 07-k8s-balanceo \
   "bash scripts/demo_balanceo.sh 12"
 
-POD=$(kubectl get pods -n $NS -l app=riesgo-credito-api -o jsonpath='{.items[0].metadata.name}')
 bash "$CAP" 08-k8s-autorreparacion \
-  "kubectl get pods -n $NS -l app=riesgo-credito-api" \
-  "kubectl delete pod $POD -n $NS" \
-  "for i in 1 2 3 4 5 6; do printf 'peticion %d -> ' \$i; curl -s -X POST http://localhost:30080/predecir -H 'Content-Type: application/json' -d '$CUERPO' | sed -E 's/.*\"pod\":\"([^\"]+)\".*/\\1/'; echo; sleep 1; done" \
-  "kubectl get pods -n $NS -l app=riesgo-credito-api" \
-  "sleep 25; kubectl get pods -n $NS -l app=riesgo-credito-api"
+  "bash scripts/demo_autorreparacion.sh" \
+  "sleep 20; kubectl get pods -n $NS -l app=riesgo-credito-api"
 
 bash "$CAP" 09-k8s-escalado \
   "kubectl scale deployment riesgo-credito-api -n $NS --replicas=5" \
@@ -53,7 +49,10 @@ bash "$CAP" 09-k8s-escalado \
   "sleep 8; kubectl get pods -n $NS -l app=riesgo-credito-api"
 
 bash "$CAP" 10-k8s-trazabilidad \
-  "curl -s http://localhost:30080/info | $PY -m json.tool" \
+  "curl -s http://localhost:30080/info | python -m json.tool" \
   "cat entrenamiento/modelo_desplegado.json"
+
+bash "$CAP" 16-k8s-cambio-version \
+  "bash scripts/demo_cambio_version.sh"
 
 echo "Listo: salidas en docs/evidencia/salidas/"

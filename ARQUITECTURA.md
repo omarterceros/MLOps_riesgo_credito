@@ -64,18 +64,23 @@ métricas, para poder argumentar la elección con la vista de comparación de ML
 fue el primero que vi". El preprocesamiento (one-hot de SEX/EDUCATION/MARRIAGE y escalado) va
 dentro del pipeline, así lo que se empaqueta es el modelo completo.
 
-**Champion / challenger con alias.** MLflow 3 recomienda alias en lugar de *stages*. La versión
-`baseline` (regresión logística) es el primer champion y queda para rollback; el mejor run por
-roc_auc es el challenger que la supera y se promueve a `champion`. Cambiar de modelo en
-producción es cambiar el alias y reiniciar los pods (`kubectl rollout restart`), sin reconstruir
-la imagen.
+**Champion / challenger con alias.** MLflow 3 recomienda alias en lugar de *stages*. La versión 1
+(`baseline`, regresión logística) es la referencia contra la que se compara todo y la versión a
+la que se vuelve en un rollback; la versión 2 (`champion`, el mejor run por roc_auc) es la que
+está en producción. Un futuro reentrenamiento registrará un challenger (versión 3) que solo
+tomará el alias si supera al champion. Cambiar de modelo en producción es mover el alias y
+reiniciar los pods (`scripts/cambiar_champion.py <versión>` + `kubectl rollout restart`), sin
+reconstruir la imagen; `scripts/demo_cambio_version.sh` ejecuta el rollback a la versión 1 y la
+vuelta a la 2 con el servicio en marcha.
 
 **El modelo no viaja en la imagen.** La imagen contiene solo el código y las dependencias
 fijadas (incluida `mlflow==3.18.0`, la misma versión del servidor). Al arrancar, el servicio
 resuelve el alias, descarga esa versión exacta y la deja en memoria. Ventaja: una sola imagen
 sirve cualquier versión del registro y la trazabilidad es explícita. Costo: el arranque depende
 del servidor de MLflow; por eso `/health` responde 503 hasta que el modelo está cargado y la
-readiness probe no manda tráfico antes de tiempo.
+readiness probe no manda tráfico antes de tiempo. La liveness probe apunta a `/vivo`, que
+responde mientras el proceso esté vivo: una caída de MLflow deja al pod fuera del Service pero
+no lo reinicia (reiniciarlo no arreglaría nada y provocaría un CrashLoopBackOff).
 
 **Kubernetes.** Namespace propio, Deployment con 3 réplicas (alta disponibilidad), `POD_NAME`
 inyectado por `fieldRef` para demostrar el balanceo, `requests`/`limits` porque los modelos
@@ -118,8 +123,18 @@ admite esperar.
 **Retraso de etiquetas.** La mora se conoce 30-90 días después. Mientras tanto se vigilan
 señales sin etiqueta calculadas el mismo día (PSI de la distribución de scores, tasa de
 positivos predicha, data drift de las entradas), se cierran los lotes con retraso cuando llegan
-las etiquetas, y ante señales tempranas se entrena un challenger en paralelo (shadow) que solo
-reemplaza al champion si le gana cuando las etiquetas confirman la caída.
+las etiquetas (en producción, con una etiqueta proxy temprana: el primer atraso observado a los
+30 días de la predicción, que este dataset no trae), y ante señales tempranas se entrena un
+challenger en paralelo (shadow) que solo reemplaza al champion si le gana cuando las etiquetas
+confirman la caída.
+
+**Limitaciones reconocidas.** El champion se eligió sobre el conjunto de prueba, sin validación
+separada ni validación cruzada, y los modelos de árboles están a menos de 0.007 de roc_auc entre
+sí (dentro del error de muestreo); un desempate riguroso usaría validación cruzada estratificada
+registrada en MLflow. HistGradientBoosting aplica early stopping automático con más de 10.000
+filas: `max_iter` es un tope (el champion se detuvo en 104 iteraciones). Las variables ordinales
+PAY_* se tratan como categóricas (chi-cuadrado + PSI); una alternativa sensible al orden sería
+KS o Mann-Whitney sobre los códigos.
 
 ## 6. Versiones
 

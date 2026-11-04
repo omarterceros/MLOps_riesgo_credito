@@ -121,9 +121,16 @@ def raiz():
     return RedirectResponse("/docs")
 
 
+@app.get("/vivo")
+def vivo():
+    """Liveness: el proceso atiende peticiones. No depende de MLflow: si el modelo no esta
+    cargado es /health (readiness) la que deja al pod fuera del Service, sin reiniciarlo."""
+    return {"status": "vivo", "pod": POD}
+
+
 @app.get("/health")
 def health():
-    """Listo solo cuando el modelo esta cargado: Kubernetes lo usa como readiness/liveness."""
+    """Readiness: listo solo cuando el modelo esta cargado; hasta entonces el pod no recibe trafico."""
     if estado["modelo"] is None:
         return JSONResponse(status_code=503, content={"status": "cargando_modelo", "pod": POD, "error": estado["error"]})
     return {"status": "ok", "pod": POD, "modelo": info_modelo()}

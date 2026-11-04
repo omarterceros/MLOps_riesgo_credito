@@ -225,8 +225,11 @@ def main() -> int:
     salida = Path(args.salida)
     salida.mkdir(parents=True, exist_ok=True)
     tabla.to_csv(salida / "concept_drift.csv", index=False)
-    (salida / "concept_drift.json").write_text(json.dumps({**info, "alarma_en_lote": alarma, "caida_maxima": CAIDA_MAXIMA,
-                                                           "lotes_sostenidos": LOTES_SOSTENIDOS}, indent=2), encoding="utf-8")
+    (salida / "concept_drift.json").write_text(json.dumps({
+        **info, "alarma_en_lote": alarma, "caida_maxima": CAIDA_MAXIMA, "caida_critica": CAIDA_CRITICA,
+        "lotes_sostenidos": LOTES_SOSTENIDOS, "n_lotes": N_LOTES, "n_por_lote": N_POR_LOTE,
+        "inicio_drift": INICIO_DRIFT, "fraccion_reasignada": FRACCION_REASIGNADA,
+    }, indent=2), encoding="utf-8")
     graficar(tabla, auc_ref, alarma, salida / "concept_drift.png")
     print(f"Grafica: {salida / 'concept_drift.png'}")
     return 1 if alarma is not None else 0

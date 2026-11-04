@@ -2,6 +2,7 @@
 
 Proyecto final del módulo **ML-Ops y Puesta en Producción** (MIAV1E414, Maestría en IA, UAGRM).
 Autor: **Omar Terceros Vallejos** (trabajo individual).
+Repositorio: _(pendiente de publicar; `scripts\publicar_repo.ps1 -Url <url>` lo sube y completa este enlace)_
 
 Un modelo que predice si un cliente de tarjeta de crédito **entrará en mora el mes siguiente**,
 llevado desde el entrenamiento hasta un despliegue reproducible y observable:
@@ -87,9 +88,13 @@ riesgo-credito-mlops/
 ```bash
 kubectl get pods -n riesgo-credito -o wide                      # 3 réplicas Running
 scripts/demo_balanceo.sh 12                                      # cada petición dice qué pod la atendió
-kubectl delete pod -n riesgo-credito <uno de los pods>           # autorreparación: aparece otro
+scripts/demo_autorreparacion.sh                                  # borra un pod con tráfico concurrente: todo 200
 kubectl scale deployment riesgo-credito-api -n riesgo-credito --replicas=5
+scripts/demo_cambio_version.sh                                   # rollback del alias champion a v1 y vuelta a v2, sin tocar la imagen
 ```
+
+Sondas: `readinessProbe` sobre `/health` (listo solo con el modelo cargado) y `livenessProbe` sobre
+`/vivo` (reinicia solo si el proceso dejó de responder; una caída de MLflow no reinicia los pods).
 
 ## Pruebas automatizadas
 
@@ -102,4 +107,7 @@ pytest tests/test_lote_produccion.py --lote monitoreo/lotes/lote_derivado.csv  -
 
 Trabajo individual: todos los componentes (datos y MLflow, servicio y Docker, Kubernetes y UI,
 monitoreo de drift, documentación) fueron construidos por Omar Terceros Vallejos. El historial
-de commits (`git log`) muestra el avance por componente.
+de commits (`git log`) está organizado por componente: los siete primeros se crearon al
+consolidar el trabajo (por eso comparten hora) y los siguientes reflejan las iteraciones reales
+(ajustes de MLflow 3, calibración del concept drift, evidencias, informe y correcciones de la
+revisión).

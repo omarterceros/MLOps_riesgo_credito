@@ -13,7 +13,10 @@ const RAIZ = path.resolve(__dirname, "..", "..");
 const CAP = path.join(RAIZ, "docs", "evidencia", "capturas");
 const SAL = path.join(RAIZ, "docs", "evidencia", "salidas");
 const OUT = path.join(RAIZ, "docs", "Informe_ProyectoFinal_MLOps.docx");
-const REPO_URL = process.env.REPO_URL || "https://github.com/<usuario>/riesgo-credito-mlops";
+// La URL del repositorio se lee de docs/REPO_URL.txt (la escribe scripts/publicar_repo.ps1 al publicar).
+const ARCHIVO_URL = path.join(RAIZ, "docs", "REPO_URL.txt");
+const REPO_URL = process.env.REPO_URL || (fs.existsSync(ARCHIVO_URL) ? fs.readFileSync(ARCHIVO_URL, "utf-8").trim() : "")
+  || "(pendiente: se completa al publicar el repositorio con scripts/publicar_repo.ps1)";
 const PAGE_W_PX = 696;
 
 // ----------------------------------------------------------------------------- datos reales
@@ -29,8 +32,11 @@ const csv = (f) => {
   return filas.map((l) => Object.fromEntries(l.split(",").map((v, i) => [cols[i], v])));
 };
 const LOTES = existe("monitoreo/salidas/concept_drift.csv") ? csv("monitoreo/salidas/concept_drift.csv") : [];
-const DD_ROJO = existe("monitoreo/salidas/data_drift_lote_derivado.csv") ? csv("monitoreo/salidas/data_drift_lote_derivado.csv") : [];
-const DD_VERDE = existe("monitoreo/salidas/data_drift_lote_normal.csv") ? csv("monitoreo/salidas/data_drift_lote_normal.csv") : [];
+// Los reportes de data drift se leen del JSON (el CSV tiene comas dentro de "detalle").
+const DD_ROJO = existe("monitoreo/salidas/data_drift_lote_derivado.json") ? json("monitoreo/salidas/data_drift_lote_derivado.json").variables : [];
+const DD_VERDE = existe("monitoreo/salidas/data_drift_lote_normal.json") ? json("monitoreo/salidas/data_drift_lote_normal.json").variables : [];
+const FRACCIONES = (CD.fraccion_reasignada || []).map((f) => `${Math.round(f * 100)} %`);
+const FRACCIONES_TXT = FRACCIONES.length ? FRACCIONES.slice(0, -1).join(", ") + " y " + FRACCIONES[FRACCIONES.length - 1] : "";
 
 // tabla de runs desde la salida del entrenamiento
 function runsDesdeSalida() {
@@ -131,7 +137,7 @@ add(
   p("El énfasis, como pide el enunciado, está en la ingeniería alrededor del modelo (empaquetado, alta disponibilidad, trazabilidad y detección de degradación) y no en la exactitud del modelo."),
 
   h1("2. Modalidad y reparto de trabajo"),
-  p("Trabajo individual. La tabla indica los componentes y quién los construyó; el historial de commits del repositorio (git log) muestra el avance por componente."),
+  p("Trabajo individual. La tabla indica los componentes y quién los construyó; el historial de commits del repositorio (git log) está organizado por componente."),
   tabla(["Componente", "Qué incluye", "Integrante"], [
     ["Datos y esquema", "comun/esquema.py, comun/datos.py, datos/descargar.py, datos/credito.csv", "Omar Terceros"],
     ["Fase 1 · MLflow", "entrenamiento/entrenar.py (8 runs), entrenamiento/registrar.py (registry y alias)", "Omar Terceros"],
@@ -142,7 +148,7 @@ add(
     ["Documentación", "README.md, ARQUITECTURA.md, este informe y las evidencias", "Omar Terceros"],
   ], { cols: [2200, 5400, 1700] }),
   espacio(),
-  p("Historial de commits (uno por componente, en orden):"),
+  p("Historial de commits (uno por componente, en orden). Nota sobre el historial: el código se desarrolló y probó primero en local y los siete primeros commits se crearon por componente al consolidar el trabajo (por eso comparten hora); los siguientes reflejan las iteraciones reales del día (ajustes de MLflow 3, calibración del concept drift, evidencias, informe y correcciones de la revisión)."),
   archivo("docs/evidencia/salidas/00-git-log.txt", 40),
 
   h1("3. Fase 1 — Modelo, experimentación y trazabilidad con MLflow"),
@@ -169,14 +175,16 @@ add(
   bullet("Tags: dataset, datos_md5 (huella del CSV), familia, metrica_principal y modelo_id."),
   bullet("Artefactos: matriz de confusión (PNG), reporte de clasificación (TXT), el conjunto de entrenamiento como input del run (nombre, fuente y esquema) y el modelo empaquetado con el flavor sklearn, con firma (signature) y ejemplo de entrada (input_example)."),
   p("No se guarda ningún modelo con pickle o joblib a mano ni se comparan métricas en una hoja de cálculo: la comparación se hace en la interfaz de MLflow."),
-  figure("mlflow-01-experimento.png", "Interfaz de MLflow: el experimento riesgo-credito con los runs ordenados por roc_auc."),
-  figure("mlflow-02-comparacion.png", "Vista de comparación de MLflow con varios runs seleccionados: parámetros y métricas lado a lado, que es donde se argumenta la elección del modelo."),
+  figure("mlflow-01-experimento.png", "Interfaz de MLflow: el experimento riesgo-credito con los runs ordenados por roc_auc y las columnas de métricas y familia visibles."),
+  figure("mlflow-05-filtro.png", "Filtro aplicado en la tabla de runs (metrics.roc_auc > 0.77 and tags.familia = 'hist_gradient_boosting'): quedan 3 runs."),
+  figure("mlflow-02-comparacion.png", "Vista de comparación de MLflow con cuatro runs seleccionados: gráfico de coordenadas paralelas (parámetros y roc_auc) y detalles de los runs."),
+  figure("mlflow-02b-comparacion-tabla.png", "La misma comparación, más abajo: parámetros y métricas de los cuatro runs lado a lado (accuracy, f1, pr_auc, precision, recall, roc_auc), que es donde se argumenta la elección del modelo."),
 
   h2("3.4 Registro y versionado del modelo (Model Registry)"),
   pr(["El modelo se registra con el nombre estable ", mono("riesgo-credito"), ". Se usan alias (recomendados en MLflow 3 en lugar de los stages) siguiendo el paradigma champion/challenger visto en clase:"]),
-  bulletRuns([b(`Versión ${M.baseline.version} — alias baseline. `), `Run ${M.baseline.run_id} (${M.baseline.run_name}), roc_auc ${f4(M.baseline.roc_auc)}. Es el modelo base, simple e interpretable, que fue el primer champion y queda disponible para rollback.`]),
-  bulletRuns([b(`Versión ${M.version} — alias champion. `), `Run ${M.run_id} (${M.run_name}, ${M.familia}), roc_auc ${f4(M.roc_auc)}. Es el mejor run del experimento por la métrica principal: el challenger que supera al modelo base y se promueve a producción.`]),
-  pr(["El servicio consume el modelo por la referencia ", mono(M.uri), ": al arrancar resuelve el alias en el registro, carga esa versión exacta y expone en /info y en cada respuesta la versión y el run que la produjo. Cambiar el modelo en producción es cambiar el alias y reiniciar los pods, sin reconstruir la imagen."]),
+  bulletRuns([b(`Versión ${M.baseline.version} — alias baseline. `), `Run ${M.baseline.run_id} (${M.baseline.run_name}), roc_auc ${f4(M.baseline.roc_auc)}. Es el modelo base, simple e interpretable: la referencia contra la que se compara el resto y la versión a la que se vuelve en un rollback.`]),
+  bulletRuns([b(`Versión ${M.version} — alias champion. `), `Run ${M.run_id} (${M.run_name}, ${M.familia}), roc_auc ${f4(M.roc_auc)}. Es el mejor run del experimento por la métrica principal y es la versión en producción. Cuando un reentrenamiento produzca un challenger, se registrará como versión 3 y solo tomará el alias champion si supera a la versión 2 en la métrica.`]),
+  pr(["El servicio consume el modelo por la referencia ", mono(M.uri), ": al arrancar resuelve el alias en el registro, carga esa versión exacta y expone en /info y en cada respuesta la versión y el run que la produjo. Cambiar el modelo en producción es cambiar el alias y reiniciar los pods, sin reconstruir la imagen; la sección 5.5 muestra ese ciclo ejecutado (rollback a la versión 1 y vuelta a la 2)."]),
   tabla(["Referencia", "Versión", "Run", "Run name", "roc_auc", "Uso"], [
     [M.uri, String(M.version), M.run_id, M.run_name, f4(M.roc_auc), "En producción (lo cargan los pods)"],
     [`models:/${M.nombre_registro}@${M.baseline.alias}`, String(M.baseline.version), M.baseline.run_id, M.baseline.run_name, f4(M.baseline.roc_auc), "Modelo base / rollback"],
@@ -190,13 +198,13 @@ add(
   p("El servidor se levanta con scripts\\mlflow_server.ps1 y queda en http://localhost:5050. Guion para mostrar en vivo:"),
   bullet("Abrir el experimento riesgo-credito: cada run es un algoritmo con una combinación de hiperparámetros entrenado sobre la misma partición; el nombre del run lo resume (por ejemplo hgb_lr0.1_200it)."),
   bullet("Ordenar la tabla por la columna roc_auc (clic en el encabezado) y filtrar, por ejemplo, metrics.roc_auc > 0.77 o tags.familia = 'hist_gradient_boosting'."),
-  bullet("Seleccionar varios runs y pulsar Compare: la vista muestra parámetros y métricas en paralelo y permite explicar por qué se eligió el champion (mejor roc_auc con tiempo de entrenamiento razonable) frente a la regresión logística base."),
-  bullet(`Abrir Models → riesgo-credito: la versión ${M.version} lleva el alias champion y enlaza al run ${M.run_id}; es la misma versión que devuelve http://localhost:30080/info.`),
+  bullet("Marcar varios runs con la casilla de la izquierda y pulsar Compare (el botón aparece junto a Delete): la vista muestra parámetros y métricas en paralelo y permite explicar por qué se eligió el champion (mejor roc_auc con tiempo de entrenamiento de segundos) frente a la regresión logística base."),
+  bullet(`Abrir Model registry (enlace propio en la barra lateral; la pestaña Models del experimento lista los modelos registrados por run, no el registro) → riesgo-credito → Version ${M.version}: lleva el alias champion y enlaza al run ${M.run_id} (Source Run); es la misma versión que devuelve http://localhost:30080/info.`),
 );
 
 add(
   h1("4. Fase 2 — Contenerización con Docker"),
-  p("El servicio de inferencia corre dentro de un contenedor sin depender de nada instalado en la máquina anfitriona. La imagen contiene el código (comun/ y servicio/) y las dependencias fijadas por versión, incluida la de MLflow; el modelo no va dentro de la imagen: se descarga del registro al arrancar."),
+  p("El servicio de inferencia corre dentro de un contenedor: la imagen contiene el código (comun/ y servicio/) y todas las dependencias fijadas por versión, incluida la de MLflow, así que no necesita Python ni librerías de la máquina anfitriona. El único servicio externo del que depende, a propósito, es el servidor de MLflow (Model Registry): el modelo no va dentro de la imagen sino que se descarga del registro al arrancar, porque la consigna exige consumirlo por su alias y no por una ruta de archivo. En Kubernetes esa dirección viene del ConfigMap; en un despliegue real sería un servidor de MLflow compartido (sección 8)."),
   h3("Dockerfile"),
   archivo("Dockerfile"),
   h3("requirements-servicio.txt (lo único que se instala en la imagen)"),
@@ -212,7 +220,7 @@ add(
   p("Clúster local: el Kubernetes integrado de Docker Desktop (un nodo, v1.34.1). Los manifiestos están en k8s/ y se aplican con kubectl apply -f k8s/:"),
   bullet("00-namespace.yaml: namespace riesgo-credito."),
   bullet("01-configmap.yaml: MLFLOW_TRACKING_URI=http://host.docker.internal:5050 (el servidor de MLflow en la máquina anfitriona), MODELO_NOMBRE, MODELO_ALIAS=champion, UMBRAL_MORA."),
-  bullet("02-deployment.yaml: 3 réplicas de riesgo-credito-api:1.0; POD_NAME inyectado desde metadata.name; requests (250m CPU, 512Mi) y limits (1 CPU, 1Gi); readinessProbe y livenessProbe sobre /health; estrategia RollingUpdate con maxSurge 1 y maxUnavailable 0."),
+  bullet("02-deployment.yaml: 3 réplicas de riesgo-credito-api:1.0; POD_NAME inyectado desde metadata.name; requests (250m CPU, 512Mi) y limits (1 CPU, 1Gi); readinessProbe sobre /health (listo solo con el modelo cargado) y livenessProbe sobre /vivo (reinicia solo si el proceso dejó de responder, no si MLflow está caído); estrategia RollingUpdate con maxSurge 1 y maxUnavailable 0."),
   bullet("03-service.yaml: Service NodePort 30080 → puerto 8000 de los pods con la etiqueta app=riesgo-credito-api."),
   bullet("04-ui-configmap.yaml y 05-ui.yaml: la interfaz web (sección 7)."),
   h3("Deployment"),
@@ -227,8 +235,8 @@ add(
   figure("07-k8s-balanceo.png", "Doce peticiones sucesivas al Service atendidas por pods distintos y el conteo por pod."),
 
   h2("5.3 Demostración 3: autorreparación"),
-  p("Se elimina un pod a mano mientras un bucle sigue pidiendo predicciones al Service. El ReplicaSet crea un pod nuevo de inmediato y las peticiones siguen siendo atendidas por los pods que quedan (el Service deja de enrutar al pod que muere en cuanto deja de estar Ready)."),
-  figure("08-k8s-autorreparacion.png", "kubectl delete pod, las peticiones que siguen respondiendo durante la reposición y el pod nuevo (edad de segundos) en Running."),
+  p("scripts/demo_autorreparacion.sh lanza en segundo plano un bucle que manda una petición al Service cada 0,5 s e imprime la hora, el código HTTP y el pod que atendió; dos segundos después elimina un pod con kubectl delete pod --wait=false (sin esperar a que termine). El ReplicaSet crea un pod nuevo de inmediato y todas las peticiones del bucle, incluidas las emitidas durante la eliminación, devuelven 200 atendidas por los pods que quedan: el Service deja de enrutar al pod que muere en cuanto deja de estar Ready."),
+  figure("08-k8s-autorreparacion.png", "Bucle de peticiones concurrente con kubectl delete pod: todas devuelven HTTP 200, el pod eliminado desaparece y el ReplicaSet crea uno nuevo (edad de segundos) que queda en Running."),
 
   h2("5.4 Demostración 4: escalado"),
   p("kubectl scale cambia el número de réplicas de 3 a 5 y luego de vuelta a 3; con 5 réplicas el balanceo reparte las peticiones entre los cinco pods."),
@@ -237,6 +245,9 @@ add(
   h2("5.5 Trazabilidad en vivo"),
   pr(["GET /info del servicio desplegado devuelve el pod, el servidor de MLflow y el modelo cargado: nombre, alias, versión y run. Coincide con entrenamiento/modelo_desplegado.json y con lo que muestra el Model Registry: el modelo que sirve peticiones en el clúster es exactamente la versión ", b(String(M.version)), " del run ", mono(M.run_id), "."]),
   figure("10-k8s-trazabilidad.png", "GET /info contra el Service de Kubernetes y el archivo modelo_desplegado.json: misma versión y mismo run."),
+  h3("Cambio de versión en producción sin reconstruir la imagen (rollback y promoción)"),
+  p(`scripts/demo_cambio_version.sh ejecuta el ciclo completo: mueve el alias champion a la versión ${M.baseline.version} (rollback al modelo base) con scripts/cambiar_champion.py, hace kubectl rollout restart y, con maxSurge 1 / maxUnavailable 0, los pods se renuevan sin que el servicio se corte; GET /info pasa a devolver la versión ${M.baseline.version} y su run. Después vuelve a mover el alias a la versión ${M.version} y repite el rolling update: el servicio vuelve a servir el champion. Es exactamente lo que haría el equipo cuando un challenger gane o cuando haya que volver atrás.`),
+  figure("16-k8s-cambio-version.png", `Rollback y promoción por alias: /info antes (versión ${M.version}), tras mover el alias a la versión ${M.baseline.version} y reiniciar (versión ${M.baseline.version}), y al final de nuevo la versión ${M.version}; todo sin tocar la imagen.`),
 );
 
 add(
@@ -245,7 +256,7 @@ add(
   p("monitoreo/data_drift.py compara cada una de las 23 variables de entrada de un lote nuevo contra el baseline de entrenamiento (los 24.000 clientes del conjunto de entrenamiento, la misma partición con la que se entrenó el champion)."),
   h3("Pruebas por tipo de variable y por qué"),
   bullet("Numéricas (LIMIT_BAL, AGE, BILL_AMT1…6, PAY_AMT1…6): prueba de Kolmogorov-Smirnov de dos muestras más PSI por deciles del baseline. KS es no paramétrica, no supone normalidad (los montos son muy asimétricos) y su estadístico D es la mayor distancia entre las dos distribuciones acumuladas, es decir, un tamaño de efecto interpretable. El PSI (índice de estabilidad poblacional) resume cuánta masa de probabilidad se movió entre deciles."),
-  bullet("Categóricas y ordinales (SEX, EDUCATION, MARRIAGE, PAY_0…PAY_6): prueba chi-cuadrado de homogeneidad sobre la tabla de contingencia baseline/lote más PSI por categoría. KS no aplica a categorías; chi-cuadrado compara las proporciones de cada categoría y la V de Cramer da el tamaño del efecto. Las categorías con menos del 1 % en el baseline se agrupan en otros para que las frecuencias esperadas sean razonables."),
+  bullet("Categóricas y ordinales (SEX, EDUCATION, MARRIAGE, PAY_0…PAY_6): prueba chi-cuadrado de homogeneidad sobre la tabla de contingencia baseline/lote más PSI por categoría. KS no aplica a categorías nominales; chi-cuadrado compara las proporciones de cada categoría y la V de Cramer da el tamaño del efecto. Las categorías con menos del 1 % en el baseline se agrupan en otros para que las frecuencias esperadas sean razonables. Son dos pruebas para tres tipos de variable: las ordinales PAY_* (11 niveles enteros, muy concentrados en -2, -1 y 0) se tratan como categóricas a propósito, porque chi-cuadrado detecta cualquier cambio en la forma de la distribución (no solo de posición) y el PSI por categoría es directamente interpretable; una alternativa sensible al orden sería KS o Mann-Whitney sobre los códigos."),
   h3("Umbrales y de dónde salen"),
   bullet("PSI < 0.10 sin cambio; 0.10 a 0.25 cambio moderado (vigilar, amarillo); ≥ 0.25 cambio importante (rojo). Son los cortes clásicos de la industria del credit scoring (Siddiqi, Credit Risk Scorecards, 2006), el mismo dominio del dataset."),
   bullet("α = 0.01 para KS y chi-cuadrado. Se hacen 23 pruebas por lote: con α = 0.05 se esperaría más de un falso positivo por lote; con 0.01, cerca de 0.2."),
@@ -266,9 +277,9 @@ add(
 
   h2("6.2 Concept drift (deriva de concepto)"),
   h3("Escenario simulado"),
-  p("monitoreo/concept_drift.py construye 12 lotes mensuales de 500 clientes (los 6.000 del conjunto de prueba, sin reposición, que el modelo nunca vio al entrenar). En los lotes 1 a 6 las etiquetas son las reales. Desde el lote 7 cambia la regla del mundo sin tocar las entradas: un shock económico hace que clientes que venían pagando al día (PAY_0 ≤ 0) caigan en mora; se reasigna mora = 1 a una fracción creciente de ellos (25 %, 35 %, 45 %, 55 %, 60 %, 60 %). Las X son idénticas, por lo que el detector de data drift no lo ve: solo se nota al comparar las predicciones con las etiquetas reales."),
+  p(`monitoreo/concept_drift.py construye ${CD.n_lotes || 12} lotes mensuales de ${CD.n_por_lote || 500} clientes (los 6.000 del conjunto de prueba, sin reposición, que el modelo nunca vio al entrenar). En los lotes 1 a ${(CD.inicio_drift || 7) - 1} las etiquetas son las reales. Desde el lote ${CD.inicio_drift || 7} cambia la regla del mundo sin tocar las entradas: un shock económico hace que clientes que venían pagando al día (PAY_0 ≤ 0) caigan en mora; se reasigna mora = 1 a una fracción creciente de ellos (${FRACCIONES_TXT}), un shock que empieza suave y se agrava mes a mes, como una crisis real. Las X son idénticas, por lo que el detector de data drift no lo ve: solo se nota al comparar las predicciones con las etiquetas reales.`),
   h3("Métrica por lote y gráfica temporal"),
-  p(`Se evalúa el champion (versión ${M.version}, roc_auc de referencia ${f4(CD.roc_auc_referencia)} sobre el conjunto de prueba al entrenarlo) en cada lote: roc_auc y f1 con etiqueta, y dos señales que no necesitan etiqueta (PSI de la distribución de scores respecto del entrenamiento y tasa de positivos predicha).`),
+  p(`Se evalúa el champion (versión ${M.version}, roc_auc de referencia ${f4(CD.roc_auc_referencia)} sobre el conjunto de prueba al entrenarlo) en cada lote: roc_auc y f1 con etiqueta, y dos señales que no necesitan etiqueta (PSI de la distribución de scores del lote respecto de la distribución de scores de referencia, la del conjunto de prueba al entrenar, y tasa de positivos predicha).`),
   figure("concept_drift.png", "Degradación de roc_auc en los 12 lotes mensuales (arriba) y señales sin etiqueta frente a la tasa de mora real que llega con retraso (abajo)."),
   tabla(["Lote", "n", "roc_auc", "f1", "mora real", "positivos predichos", "PSI score", "bajo umbral", "regla nueva"],
     LOTES.map((l) => [l.lote, l.n, f4(l.roc_auc), f4(l.f1), f3(l.tasa_mora_real), f3(l.tasa_positivos_predicha), f3(l.psi_score), l.bajo_umbral === "True" ? "sí" : "no", l.regla_nueva === "True" ? "sí" : "no"]),
@@ -277,18 +288,18 @@ add(
   figure("15-concept-drift.png", "Salida de monitoreo/concept_drift.py: tabla por lote y decisión del criterio de reentrenamiento."),
   h3("Criterio de reentrenamiento"),
   bullet(`Alarma cuando la caída de roc_auc respecto de la referencia supera 0.05 absoluto durante 3 lotes consecutivos (umbral = ${f4(CD.roc_auc_referencia)} − 0.05 = ${f4(CD.roc_auc_referencia - 0.05)}); alarma inmediata si la caída supera 0.12 en un solo lote (casi cinco errores estándar: una caída catastrófica que no admite esperar tres meses).`),
-  bullet("Por qué 0.05: con n = 500 y una tasa de mora del 22 %, el error estándar del AUC es de unos 0.025 (Hanley-McNeil), así que 0.05 está a dos errores estándar y no es ruido de muestreo. De hecho, en los lotes estables se ven oscilaciones de ±0.03 que no deben disparar nada."),
+  bullet("Por qué 0.05: con n = 500 y una tasa de mora del 22 % (unos 110 positivos y 390 negativos por lote), el error estándar del AUC es de unos 0.025–0.03 (fórmula de Hanley-McNeil), así que 0.05 está a unos dos errores estándar y no es ruido de muestreo. De hecho, en los lotes estables se ven oscilaciones de ±0.03 que no deben disparar nada."),
   bullet("Por qué 3 lotes: un mes malo puede ser estacional o un problema de datos; tres meses seguidos es un cambio sostenido, y el costo de reentrenar (horas) es menor que el de operar tres meses más con un modelo equivocado."),
   bullet(alarma ? `Resultado de la simulación: la alarma se disparó en el lote ${alarma} (la regla cambió en el lote 7; a los tres lotes seguidos bajo el umbral se declara concept drift y se lanza el reentrenamiento del challenger). roc_auc del lote 6: ${f4(loteRef(6).roc_auc)}; del lote 7: ${f4(loteRef(7).roc_auc)}; del lote 12: ${f4(loteRef(12).roc_auc)}.` : "Resultado de la simulación: sin alarma."),
   bullet("Qué pasa al disparar la alarma: se entrena un challenger con los datos de la regla nueva (lotes recientes ya etiquetados), se registra como nueva versión en el Model Registry y solo si supera al champion en roc_auc sobre un conjunto de validación reciente se mueve el alias champion y se hace rolling update de los pods (kubectl rollout restart), sin cortar el servicio. Si sale mal, el alias vuelve a la versión anterior: rollback inmediato."),
   h3("El problema del retraso de etiquetas"),
   p("En producción la etiqueta real (mora del mes siguiente) se conoce recién 30 a 90 días después de la predicción, y la definición operativa de mora suele requerir 90 días de atraso. Durante ese tiempo no se puede calcular roc_auc del lote. Qué hace el equipo mientras tanto:"),
   bullet("Señales sin etiqueta calculadas el mismo día: data drift de las entradas (6.1), PSI de la distribución de scores respecto del entrenamiento y tasa de positivos predicha. Son el radar temprano. La simulación muestra también su límite: en un concept drift puro las entradas y los scores no cambian (PSI del score ≈ 0 en todos los lotes), así que estas señales detectan data drift y cambios de mezcla, pero no un cambio de regla con X idéntico."),
-  bullet("Evaluación con retraso: cada lote se cierra cuando llegan sus etiquetas; la gráfica temporal se construye con lotes cerrados y el criterio de 3 lotes se aplica sobre ellos. Para acortar el retraso se usan etiquetas proxy tempranas (primer atraso a 30 días, que el dataset ya codifica en PAY_0)."),
+  bullet("Evaluación con retraso: cada lote se cierra cuando llegan sus etiquetas; la gráfica temporal se construye con lotes cerrados y el criterio de 3 lotes se aplica sobre ellos. Para acortar el retraso, en producción se usaría una etiqueta proxy temprana: el primer atraso observado a los 30 días de la predicción (el estado de pago del mes siguiente, que este dataset no trae: PAY_0 es el estado del mes en que se predice, una entrada, y usarlo como etiqueta sería fuga de información; por eso la simulación trabaja con la etiqueta final)."),
   bullet("Muestreo con revisión humana: una muestra pequeña de solicitudes se revisa antes de los 90 días por analistas de riesgo para tener una estimación temprana de la tasa de error."),
   bullet("Challenger en sombra: ante señales tempranas se entrena ya un candidato con los datos más recientes y se lo corre en paralelo (shadow) sin exponerlo; cuando las etiquetas confirman la caída, la comparación champion/challenger ya está lista y la promoción es inmediata."),
   h3("Pruebas automatizadas"),
-  p("tests/test_concept_drift.py verifica el detector con un modelo entrenado en la propia prueba: el criterio no dispara sin caída ni con bajas aisladas, dispara con tres lotes seguidos o con una caída crítica, no hay alarma sin cambio de regla, con la regla nueva la alarma salta dentro de los tres lotes siguientes al cambio y el PSI de los scores es idéntico con y sin concept drift (las entradas no cambian). La suite completa (20 pruebas) se ejecuta con pytest."),
+  p("tests/test_concept_drift.py verifica el detector con un modelo entrenado en la propia prueba: el criterio no dispara sin caída ni con bajas aisladas, dispara con tres lotes seguidos o con una caída crítica, no hay alarma sin cambio de regla (a lo sumo lotes aislados bajo el umbral por azar, nunca una racha), con la regla nueva la alarma salta después del cambio con los tres lotes previos bajo el umbral y una caída media mayor que 0.05, y el PSI de los scores es idéntico con y sin concept drift (las entradas no cambian). La suite completa (20 pruebas) se ejecuta con pytest."),
   figure("14-pytest-suite.png", "Suite completa: 20 pruebas (API, data drift, concept drift y puerta del lote) en verde."),
 );
 
@@ -316,10 +327,14 @@ add(
     ["Umbrales de drift explícitos y justificados", "PSI 0.10/0.25 del credit scoring, α = 0.01 por las 23 pruebas, efecto mínimo 0.10 para no alertar por cambios sin tamaño práctico; 0.05 y 3 lotes para el concept drift."],
   ], { cols: [3000, 6300] }),
   espacio(),
+  h3("Limitaciones reconocidas"),
+  bullet("La elección del champion se hizo sobre el conjunto de prueba (no hay un conjunto de validación separado ni validación cruzada) y los cinco modelos de árboles están a menos de 0.007 de roc_auc entre sí, dentro del error de muestreo con n = 6.000. El énfasis del proyecto es la ingeniería; para un desempate riguroso se usaría validación cruzada estratificada (5 particiones) registrando en MLflow la media y la desviación de roc_auc."),
+  bullet("HistGradientBoostingClassifier activa early stopping automáticamente con más de 10.000 filas: max_iter es un tope, no el número de iteraciones entrenadas (el champion, declarado con max_iter = 400, se detuvo en 104 iteraciones por su criterio interno de validación con el 10 % del train; por eso entrena en décimas de segundo). Los runs hgb difieren de verdad en learning_rate y max_depth; en una siguiente iteración se registraría n_iter_ como métrica de cada run."),
+  bullet("El servidor de MLflow corre en la máquina anfitriona con SQLite: válido para la demo y para la defensa, pero en producción sería un servicio compartido con base de datos y almacén de artefactos propios, desplegado en el clúster o en la nube."),
   h3("Preguntas probables y respuesta corta"),
-  bullet("¿Por qué ese modelo y no la regresión logística? Porque en la comparación de MLflow el hist gradient boosting gana en roc_auc y pr_auc sobre la misma partición con un tiempo de entrenamiento de segundos; la logística queda registrada como versión base para rollback y como referencia de interpretabilidad."),
+  bullet("¿Por qué ese modelo y no la regresión logística? Porque en la comparación de MLflow el hist gradient boosting gana claramente a la logística en roc_auc (0.780 frente a 0.710) sobre la misma partición, con un tiempo de entrenamiento de segundos; entre los modelos de árboles la diferencia es pequeña y se eligió el de mejor roc_auc. La logística queda registrada como versión base para rollback y como referencia de interpretabilidad."),
   bullet("¿Cómo sé que el pod sirve el modelo del registro? GET /info y cada respuesta devuelven versión y run_id; coinciden con el alias champion en el Model Registry y con modelo_desplegado.json."),
-  bullet("¿Qué pasa si se cae el servidor de MLflow? Los pods que ya cargaron el modelo siguen sirviendo (está en memoria); un pod nuevo reintenta cada 10 s y no recibe tráfico hasta cargarlo (readiness)."),
+  bullet("¿Qué pasa si se cae el servidor de MLflow? Los pods que ya cargaron el modelo siguen sirviendo (está en memoria). Un pod nuevo reintenta la carga cada 10 s y, mientras tanto, la readiness (/health en 503) lo deja fuera del Service; la liveness apunta a /vivo, que responde mientras el proceso esté vivo, así que Kubernetes no lo reinicia por una caída de MLflow."),
   bullet("¿Data drift siempre implica reentrenar? No: se vigila. Reentrenar lo decide el concept drift (la métrica cae de forma sostenida). El data drift sí obliga a investigar la fuente de datos."),
   bullet("¿Por qué KS para numéricas y chi-cuadrado para categóricas? KS compara distribuciones continuas sin suponer forma; en categorías no hay orden ni acumulada, así que se comparan proporciones por categoría con chi-cuadrado; el PSI sirve para ambas y es el estándar del dominio."),
   bullet("¿Cómo se cambia de versión sin cortar el servicio? Se mueve el alias champion a la nueva versión y se hace kubectl rollout restart: con maxSurge 1 y maxUnavailable 0 nunca hay menos de 3 pods listos."),
@@ -341,6 +356,7 @@ add(
   p("Versiones: Python 3.13 · mlflow 3.18.0 · scikit-learn 1.9.1 · pandas 3.1.0 · fastapi 0.162.0 · Docker Desktop con Kubernetes v1.34.1."),
 
   h1("10. Listado de evidencias"),
+  p("Cómo se tomaron las evidencias: las salidas de terminal se capturaron con docs/herramientas/cap.sh, que ejecuta cada comando real y guarda su salida con tee en docs/evidencia/salidas/*.txt; las imágenes de terminal de este informe se renderizan desde esos archivos de texto con docs/herramientas/render_terminal.py (no son capturas de pantalla, pero reproducen exactamente la salida guardada, que es la que se puede auditar). Las capturas de la interfaz de MLflow, de la interfaz web y de Swagger son capturas de navegador. La gráfica de concept drift la genera monitoreo/concept_drift.py.", { italics: true }),
 );
 FIGS.forEach((f) => children.push(bullet(`Figura ${f.n} (${f.file}): ${f.caption}`)));
 
