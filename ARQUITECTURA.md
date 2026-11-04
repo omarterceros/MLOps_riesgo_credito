@@ -102,6 +102,38 @@ localhost (protección contra DNS rebinding), así que el servidor se levanta co
 el servidor sería compartido y estaría desplegado como un servicio más (Docker/Kubernetes) con
 una base de datos y un almacén de artefactos remotos.
 
+## 4b. Los tres pilares de validación y la compuerta de calidad
+
+Siguiendo lo visto en clase, cada cambio se valida en los tres pilares antes de llegar a
+producción:
+
+| Pilar | Qué se valida | Dónde |
+|---|---|---|
+| Código | 24 pruebas con pytest: API (validación de entradas, 503 sin modelo, /vivo), detector de data drift, concept drift, validación de datos y la puerta del lote | `tests/` |
+| Datos | Esquema (23 columnas numéricas), nulos, rangos del diccionario de datos y mínimo de filas; falla con código 1 y detiene el flujo | `monitoreo/validar_datos.py` |
+| Modelo | Compuerta de calidad al registrar: un candidato solo toma el alias `champion` si su roc_auc ≥ 0.75 **y** supera al champion actual; si no, el alias no se mueve | `entrenamiento/registrar.py` |
+
+**Disparadores de reentrenamiento** (los tres de la clase): por tiempo (un CT programado,
+por ejemplo semanal, como el `ct.yml` de la heladería del docente), por rendimiento (la
+métrica real del lote cae: es el criterio de concept drift, 0.05 sostenido 3 lotes) y por
+drift de datos (en este proyecto el data drift rojo no reentrena solo: investiga y vigila,
+porque un cambio en X no implica que la regla haya cambiado). El reentrenamiento produce un
+challenger que pasa por la misma compuerta antes de reemplazar al champion.
+
+**Estrategias de despliegue.** El Deployment usa rolling update con `maxSurge: 1` y
+`maxUnavailable: 0`: nunca hay menos de 3 pods listos y, si la versión nueva no carga, los
+pods viejos siguen sirviendo (rollback con `kubectl rollout undo` o moviendo el alias). Es la
+forma básica de blue-green progresivo. Un canary real (10 % del tráfico al challenger) se haría
+con un segundo Deployment de 1 réplica con la misma etiqueta `app` detrás del mismo Service (o
+con un ingress con pesos); un A/B testing compararía la métrica de negocio de ambos con una
+prueba estadística antes de decidir. No se implementaron porque el enunciado no lo pide.
+
+**Tres capas de monitoreo.** Técnica (¿está vivo?): probes de Kubernetes, `kubectl get pods`,
+`kubectl top`. Datos y modelo (¿entiende el mundo de hoy?): data drift por variable, PSI del
+score, tasa de positivos predicha, roc_auc por lote cuando llegan las etiquetas. Negocio (¿genera
+valor?): tasa de mora real de la cartera aprobada, pérdida por mora frente al ingreso por
+créditos otorgados; es la capa que justifica el umbral de decisión y el reentrenamiento.
+
 ## 5. Monitoreo de drift
 
 **Data drift** (`monitoreo/data_drift.py`): cada variable del lote nuevo contra el conjunto de

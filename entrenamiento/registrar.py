@@ -29,6 +29,11 @@ ALIAS_PRODUCCION = "champion"
 ALIAS_BASE = "baseline"
 ARCHIVO_DESPLEGADO = RAIZ / "entrenamiento" / "modelo_desplegado.json"
 
+# Compuerta de calidad (quality gate): ningun modelo llega a champion si no supera este
+# roc_auc minimo Y al champion actual (si existe). 0.75 es el nivel que alcanzan los modelos
+# de arboles sobre este dataset en la literatura; la regresion logistica (0.71) no lo pasa.
+ROC_AUC_MINIMO = 0.75
+
 
 def uri_del_modelo(run) -> str:
     modelo_id = run.data.tags.get("modelo_id")
@@ -81,9 +86,23 @@ def main(tracking_uri: str) -> None:
 
     v_base = registrar_run(cliente, mejor_logistica, "Modelo base (regresion logistica)")
     v_prod = registrar_run(cliente, mejor, "Mejor run del experimento por roc_auc: promovido a produccion")
-
     cliente.set_registered_model_alias(NOMBRE_REGISTRO, ALIAS_BASE, v_base.version)
+
+    # Compuerta de calidad antes de tocar el alias champion
+    auc_mejor = mejor.data.metrics["roc_auc"]
+    try:
+        actual = cliente.get_model_version_by_alias(NOMBRE_REGISTRO, ALIAS_PRODUCCION)
+        auc_actual = cliente.get_run(actual.run_id).data.metrics["roc_auc"]
+    except mlflow.exceptions.MlflowException:
+        actual, auc_actual = None, None
+    print(f"Compuerta de calidad: roc_auc del candidato {auc_mejor:.4f} | minimo exigido {ROC_AUC_MINIMO} | "
+          f"champion actual {'v' + actual.version + ' ' + format(auc_actual, '.4f') if actual else 'ninguno'}")
+    if auc_mejor < ROC_AUC_MINIMO:
+        sys.exit(f"RECHAZADO: el candidato no alcanza el roc_auc minimo ({ROC_AUC_MINIMO}); el alias champion no se mueve")
+    if actual is not None and actual.version != v_prod.version and auc_mejor <= auc_actual:
+        sys.exit("RECHAZADO: el candidato no supera al champion actual; el alias champion no se mueve")
     cliente.set_registered_model_alias(NOMBRE_REGISTRO, ALIAS_PRODUCCION, v_prod.version)
+    print(f"APROBADO: version {v_prod.version} pasa la compuerta y queda como champion")
 
     desplegado = {
         "nombre_registro": NOMBRE_REGISTRO,

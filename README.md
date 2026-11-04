@@ -49,14 +49,21 @@ python -m venv .venv
 .\scripts\desplegar_k8s.ps1
 #    API:  http://localhost:30080/docs      UI: http://localhost:30081
 
-# 4) Fase 4: drift
+# 4) Fase 4: validación de datos y drift
 .\.venv\Scripts\python monitoreo\lotes.py
+.\.venv\Scripts\python monitoreo\validar_datos.py monitoreo\lotes\lote_normal.csv         # OK (exit 0)
+.\.venv\Scripts\python monitoreo\validar_datos.py monitoreo\lotes\lote_invalido.csv       # ERROR (exit 1)
 .\.venv\Scripts\python monitoreo\data_drift.py --lote monitoreo\lotes\lote_normal.csv     # VERDE (exit 0)
 .\.venv\Scripts\python monitoreo\data_drift.py --lote monitoreo\lotes\lote_derivado.csv   # ROJO  (exit 1)
 .\.venv\Scripts\python monitoreo\concept_drift.py                                         # gráfica + alarma
-.\.venv\Scripts\pytest                                                                     # 20 pruebas
+.\.venv\Scripts\pytest                                                                     # 24 pruebas
 .\.venv\Scripts\pytest tests\test_lote_produccion.py --lote monitoreo\lotes\lote_derivado.csv   # falla (rojo)
 ```
+
+Los tres pilares de validación de la clase: código (`tests/`, 24 pruebas), datos
+(`monitoreo/validar_datos.py`: esquema, nulos, rangos, mínimo de filas) y modelo (compuerta de
+calidad en `entrenamiento/registrar.py`: un candidato solo es champion si roc_auc ≥ 0.75 y supera al
+champion actual).
 
 Solo con Docker, sin Kubernetes:
 
@@ -77,8 +84,8 @@ riesgo-credito-mlops/
 ├── Dockerfile        imagen del servicio (python:3.13-slim, usuario sin privilegios)
 ├── k8s/              00 namespace · 01 configmap · 02 deployment · 03 service · 04-05 UI
 ├── ui/               index.html + nginx.conf (proxy /api/ -> Service)
-├── monitoreo/        data_drift.py · lotes.py · concept_drift.py · lotes/*.csv
-├── tests/            20 pruebas (API, data drift, concept drift, puerta del lote)
+├── monitoreo/        validar_datos.py · data_drift.py · lotes.py · concept_drift.py · lotes/*.csv · salidas/
+├── tests/            24 pruebas (API, validación de datos, data drift, concept drift, puerta del lote)
 ├── scripts/          mlflow_server · entrenar_y_registrar · desplegar_k8s · demo_balanceo
 └── docs/             informe (Word), evidencia (capturas y salidas de terminal), herramientas
 ```
@@ -99,7 +106,7 @@ Sondas: `readinessProbe` sobre `/health` (listo solo con el modelo cargado) y `l
 ## Pruebas automatizadas
 
 ```
-pytest                       -> 20 pruebas (API con modelo falso, detector de data drift, concept drift, lote normal)
+pytest                       -> 24 pruebas (API con modelo falso, validación de datos, data drift, concept drift, lote normal)
 pytest tests/test_lote_produccion.py --lote monitoreo/lotes/lote_derivado.csv  -> ROJO: la prueba falla
 ```
 

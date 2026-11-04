@@ -190,7 +190,8 @@ add(
     [`models:/${M.nombre_registro}@${M.baseline.alias}`, String(M.baseline.version), M.baseline.run_id, M.baseline.run_name, f4(M.baseline.roc_auc), "Modelo base / rollback"],
   ], { cols: [2600, 800, 2600, 1500, 800, 1900], mono: [0, 2] }),
   espacio(),
-  figure("02-registrar.png", "Salida de entrenamiento/registrar.py: versiones registradas, alias y el run de cada una."),
+  p("Compuerta de calidad (quality gate): registrar.py no mueve el alias champion a ciegas. El candidato tiene que alcanzar un roc_auc mínimo de 0.75 (el nivel que logran los modelos de árboles sobre este dataset; la regresión logística, con 0.71, no lo pasa) y además superar al champion actual si ya hay uno; si no cumple, el script termina con error y el alias no cambia. Es el candado que evita que un reentrenamiento con datos malos reemplace al modelo en producción por uno peor."),
+  figure("02-registrar.png", "Salida de entrenamiento/registrar.py: versiones registradas, alias, el run de cada una y la compuerta de calidad aprobando al candidato."),
   figure("mlflow-03-registry.png", "Model Registry en la interfaz de MLflow: el modelo riesgo-credito con sus versiones y alias."),
   figure("mlflow-04-version-champion.png", `Detalle de la versión ${M.version} (alias champion) en el registro, con el enlace al run que la produjo.`),
 
@@ -252,6 +253,8 @@ add(
 
 add(
   h1("6. Fase 4 — Pruebas automatizadas de drift"),
+  p("Antes de medir drift, el lote pasa por la validación de datos (segundo pilar visto en clase): monitoreo/validar_datos.py verifica el esquema (las 23 columnas numéricas), que no haya nulos, que los valores estén en los rangos del diccionario de datos y que haya un mínimo de filas; si falla, termina con código 1 y el flujo se detiene, porque un lote roto no debe disparar ni silenciar una alarma de drift (ni usarse para reentrenar). Los tres pilares quedan así cubiertos: código (24 pruebas con pytest), datos (validar_datos.py) y modelo (la compuerta de calidad al registrar, sección 3.4)."),
+  figure("17-validar-datos.png", "Validación de datos: el lote normal pasa (código 0) y un lote con celdas vacías, códigos inexistentes y pagos negativos es rechazado con el detalle de cada problema (código 1)."),
   h2("6.1 Data drift (deriva de datos)"),
   p("monitoreo/data_drift.py compara cada una de las 23 variables de entrada de un lote nuevo contra el baseline de entrenamiento (los 24.000 clientes del conjunto de entrenamiento, la misma partición con la que se entrenó el champion)."),
   h3("Pruebas por tipo de variable y por qué"),
@@ -299,8 +302,8 @@ add(
   bullet("Muestreo con revisión humana: una muestra pequeña de solicitudes se revisa antes de los 90 días por analistas de riesgo para tener una estimación temprana de la tasa de error."),
   bullet("Challenger en sombra: ante señales tempranas se entrena ya un candidato con los datos más recientes y se lo corre en paralelo (shadow) sin exponerlo; cuando las etiquetas confirman la caída, la comparación champion/challenger ya está lista y la promoción es inmediata."),
   h3("Pruebas automatizadas"),
-  p("tests/test_concept_drift.py verifica el detector con un modelo entrenado en la propia prueba: el criterio no dispara sin caída ni con bajas aisladas, dispara con tres lotes seguidos o con una caída crítica, no hay alarma sin cambio de regla (a lo sumo lotes aislados bajo el umbral por azar, nunca una racha), con la regla nueva la alarma salta después del cambio con los tres lotes previos bajo el umbral y una caída media mayor que 0.05, y el PSI de los scores es idéntico con y sin concept drift (las entradas no cambian). La suite completa (20 pruebas) se ejecuta con pytest."),
-  figure("14-pytest-suite.png", "Suite completa: 20 pruebas (API, data drift, concept drift y puerta del lote) en verde."),
+  p("tests/test_concept_drift.py verifica el detector con un modelo entrenado en la propia prueba: el criterio no dispara sin caída ni con bajas aisladas, dispara con tres lotes seguidos o con una caída crítica, no hay alarma sin cambio de regla (a lo sumo lotes aislados bajo el umbral por azar, nunca una racha), con la regla nueva la alarma salta después del cambio con los tres lotes previos bajo el umbral y una caída media mayor que 0.05, y el PSI de los scores es idéntico con y sin concept drift (las entradas no cambian). La suite completa (24 pruebas) se ejecuta con pytest."),
+  figure("14-pytest-suite.png", "Suite completa: 24 pruebas (API, validación de datos, data drift, concept drift y puerta del lote) en verde."),
 );
 
 add(
@@ -337,7 +340,10 @@ add(
   bullet("¿Qué pasa si se cae el servidor de MLflow? Los pods que ya cargaron el modelo siguen sirviendo (está en memoria). Un pod nuevo reintenta la carga cada 10 s y, mientras tanto, la readiness (/health en 503) lo deja fuera del Service; la liveness apunta a /vivo, que responde mientras el proceso esté vivo, así que Kubernetes no lo reinicia por una caída de MLflow."),
   bullet("¿Data drift siempre implica reentrenar? No: se vigila. Reentrenar lo decide el concept drift (la métrica cae de forma sostenida). El data drift sí obliga a investigar la fuente de datos."),
   bullet("¿Por qué KS para numéricas y chi-cuadrado para categóricas? KS compara distribuciones continuas sin suponer forma; en categorías no hay orden ni acumulada, así que se comparan proporciones por categoría con chi-cuadrado; el PSI sirve para ambas y es el estándar del dominio."),
-  bullet("¿Cómo se cambia de versión sin cortar el servicio? Se mueve el alias champion a la nueva versión y se hace kubectl rollout restart: con maxSurge 1 y maxUnavailable 0 nunca hay menos de 3 pods listos."),
+  bullet("¿Cómo se cambia de versión sin cortar el servicio? Se mueve el alias champion a la nueva versión y se hace kubectl rollout restart: con maxSurge 1 y maxUnavailable 0 nunca hay menos de 3 pods listos (sección 5.5 lo muestra ejecutado)."),
+  bullet("¿Cuándo se reentrena? Por los tres disparadores vistos en clase: por tiempo (un CT programado), por rendimiento (la métrica real del lote cae: el criterio de concept drift) y por drift (un data drift rojo obliga a investigar y vigilar; en este proyecto no reentrena solo, porque un cambio en X no implica que la regla haya cambiado). El modelo reentrenado es un challenger que pasa por la misma compuerta de calidad antes de reemplazar al champion."),
+  bullet("¿Blue-green, canary o A/B? El Deployment hace rolling update (maxSurge 1, maxUnavailable 0), la forma básica de blue-green progresivo con rollback inmediato (kubectl rollout undo o mover el alias). Un canary daría el 10 % del tráfico a un segundo Deployment del challenger detrás del mismo Service, y un A/B compararía la métrica de negocio de ambos con una prueba estadística. No se implementaron porque el enunciado no lo pide, pero el diseño lo permite sin cambiar la imagen."),
+  bullet("¿Qué se monitorea? Las tres capas: técnica (probes, kubectl get pods/top: ¿está vivo?), datos y modelo (data drift por variable, PSI del score, tasa de positivos, roc_auc por lote: ¿entiende el mundo de hoy?) y negocio (tasa de mora real de la cartera aprobada y pérdida por mora frente al ingreso por créditos: ¿genera valor?)."),
 );
 
 add(
@@ -348,9 +354,10 @@ add(
     ".\\scripts\\entrenar_y_registrar.ps1       # datos, 8 runs y registro del champion",
     ".\\scripts\\desplegar_k8s.ps1              # imagen Docker + kubectl apply -f k8s/",
     "bash scripts/demo_balanceo.sh 12          # balanceo entre pods",
-    "python monitoreo/lotes.py && python monitoreo/data_drift.py --lote monitoreo/lotes/lote_derivado.csv",
+    "python monitoreo/lotes.py && python monitoreo/validar_datos.py monitoreo/lotes/lote_normal.csv",
+    "python monitoreo/data_drift.py --lote monitoreo/lotes/lote_derivado.csv   # rojo, exit 1",
     "python monitoreo/concept_drift.py         # grafica y alarma",
-    "pytest                                    # 20 pruebas",
+    "pytest                                    # 24 pruebas",
     "pytest tests/test_lote_produccion.py --lote monitoreo/lotes/lote_derivado.csv   # falla: rojo",
   ]),
   p("Versiones: Python 3.13 · mlflow 3.18.0 · scikit-learn 1.9.1 · pandas 3.1.0 · fastapi 0.162.0 · Docker Desktop con Kubernetes v1.34.1."),
