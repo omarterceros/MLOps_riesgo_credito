@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="680" viewBox="0 0 1180 680" font-family="Segoe UI, Calibri, Arial, sans-serif">
+<defs><marker id="flecha" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#444"/></marker></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="590.0" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f4e79">Arquitectura general: del entrenamiento al servicio desplegado</text>
+<g transform="translate(0,34)">
+<rect x="20" y="20" width="1140" height="230" rx="8" fill="#f5f5f5" fill-opacity="0.35" stroke="#666666" stroke-dasharray="6 4"/>
+<text x="30" y="38" font-size="12" font-weight="bold" fill="#666666">Maquina anfitriona (Windows): entorno virtual Python</text>
+<rect x="20" y="300" width="760" height="320" rx="8" fill="#dae8fc" fill-opacity="0.35" stroke="#6c8ebf" stroke-dasharray="6 4"/>
+<text x="30" y="318" font-size="12" font-weight="bold" fill="#6c8ebf">Kubernetes de Docker Desktop · namespace riesgo-credito</text>
+<line x1="240" y1="105" x2="290" y2="105" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="510" y1="105" x2="580" y2="105" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="820" y1="105" x2="870" y2="105" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="870" y1="105" x2="820" y2="105" stroke="#444" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flecha)"/>
+<line x1="538" y1="160" x2="580" y2="146" stroke="#444" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flecha)"/>
+<line x1="260" y1="377" x2="300" y2="378" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="465" y1="340" x2="655" y2="150" stroke="#444" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flecha)"/>
+<line x1="425" y1="470" x2="425" y2="420" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="588" y1="420" x2="486" y2="470" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="670" y1="470" x2="670" y2="420" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="850" y1="485" x2="550" y2="496" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="850" y1="489" x2="760" y2="494" stroke="#444" stroke-width="1.6" marker-end="url(#flecha)"/>
+<line x1="550" y1="520" x2="850" y2="568" stroke="#444" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flecha)"/>
+<rect x="40" y="70" width="200" height="70" rx="7" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+<text x="140.0" y="93" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">datos/credito.csv</text>
+<text x="140.0" y="109" text-anchor="middle" font-size="11.5" fill="#1b1b1b">UCI, 30.000 x 23 variables</text>
+<text x="140.0" y="125" text-anchor="middle" font-size="11.5" fill="#1b1b1b">MD5 como tag del run</text>
+<rect x="290" y="70" width="220" height="70" rx="7" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="400.0" y="93" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">entrenamiento/entrenar.py</text>
+<text x="400.0" y="109" text-anchor="middle" font-size="11.5" fill="#1b1b1b">8 runs (logreg, RF, HGB)</text>
+<text x="400.0" y="125" text-anchor="middle" font-size="11.5" fill="#1b1b1b">params, metricas, modelo</text>
+<rect x="580" y="60" width="240" height="90" rx="7" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
+<text x="700.0" y="93" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">MLflow server :5050</text>
+<text x="700.0" y="109" text-anchor="middle" font-size="11.5" fill="#1b1b1b">tracking + Model Registry + UI</text>
+<text x="700.0" y="125" text-anchor="middle" font-size="11.5" fill="#1b1b1b">SQLite + artefactos</text>
+<rect x="870" y="70" width="250" height="70" rx="7" fill="#ffe6cc" stroke="#d79b00" stroke-width="1.5"/>
+<text x="995.0" y="93" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">entrenamiento/registrar.py</text>
+<text x="995.0" y="109" text-anchor="middle" font-size="11.5" fill="#1b1b1b">compuerta de calidad</text>
+<text x="995.0" y="125" text-anchor="middle" font-size="11.5" fill="#1b1b1b">v1 baseline · v2 champion</text>
+<rect x="290" y="160" width="290" height="70" rx="7" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+<text x="435.0" y="183" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">monitoreo/</text>
+<text x="435.0" y="199" text-anchor="middle" font-size="11.5" fill="#1b1b1b">validar_datos · data_drift · concept_drift</text>
+<text x="435.0" y="215" text-anchor="middle" font-size="11.5" fill="#1b1b1b">lotes nuevos vs baseline</text>
+<rect x="40" y="340" width="220" height="70" rx="7" fill="#f5f5f5" stroke="#666666" stroke-width="1.5"/>
+<text x="150.0" y="363" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">Imagen Docker</text>
+<text x="150.0" y="379" text-anchor="middle" font-size="11.5" fill="#1b1b1b">riesgo-credito-api:1.0</text>
+<text x="150.0" y="395" text-anchor="middle" font-size="11.5" fill="#1b1b1b">(codigo + dependencias, sin modelo)</text>
+<rect x="300" y="340" width="250" height="80" rx="7" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="425.0" y="368" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">Deployment riesgo-credito-api</text>
+<text x="425.0" y="384" text-anchor="middle" font-size="11.5" fill="#1b1b1b">3 pods FastAPI</text>
+<text x="425.0" y="400" text-anchor="middle" font-size="11.5" fill="#1b1b1b">readiness /health · liveness /vivo</text>
+<rect x="300" y="470" width="250" height="60" rx="7" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+<text x="425.0" y="496" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">Service riesgo-credito-api</text>
+<text x="425.0" y="512" text-anchor="middle" font-size="11.5" fill="#1b1b1b">NodePort 30080</text>
+<rect x="580" y="340" width="180" height="80" rx="7" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="670.0" y="368" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">Deployment riesgo-credito-ui</text>
+<text x="670.0" y="384" text-anchor="middle" font-size="11.5" fill="#1b1b1b">nginx + index.html</text>
+<text x="670.0" y="400" text-anchor="middle" font-size="11.5" fill="#1b1b1b">proxy /api/ -&gt; Service por DNS</text>
+<rect x="580" y="470" width="180" height="60" rx="7" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+<text x="670.0" y="496" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">Service riesgo-credito-ui</text>
+<text x="670.0" y="512" text-anchor="middle" font-size="11.5" fill="#1b1b1b">NodePort 30081</text>
+<rect x="850" y="440" width="270" height="80" rx="7" fill="#f5f5f5" stroke="#666666" stroke-width="1.5"/>
+<text x="985.0" y="468" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">Navegador / curl / Swagger</text>
+<text x="985.0" y="484" text-anchor="middle" font-size="11.5" fill="#1b1b1b">localhost:30080 (API)</text>
+<text x="985.0" y="500" text-anchor="middle" font-size="11.5" fill="#1b1b1b">localhost:30081 (UI)</text>
+<rect x="850" y="560" width="270" height="60" rx="7" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+<text x="985.0" y="578" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1b1b1b">Cada respuesta:</text>
+<text x="985.0" y="594" text-anchor="middle" font-size="11.5" fill="#1b1b1b">mora, probabilidad, pod,</text>
+<text x="985.0" y="610" text-anchor="middle" font-size="11.5" fill="#1b1b1b">version y run_id del modelo</text>
+<rect x="524" y="95" width="41" height="18" rx="3" fill="#ffffff" stroke="#bbbbbb" stroke-width="0.6"/>
+<text x="545" y="109" text-anchor="middle" font-size="10.5" fill="#333">log_*</text>
+<rect x="812" y="95" width="66" height="18" rx="3" fill="#ffffff" stroke="#bbbbbb" stroke-width="0.6"/>
+<text x="845" y="109" text-anchor="middle" font-size="10.5" fill="#333">mejor run</text>
+<rect x="824" y="95" width="41" height="18" rx="3" fill="#ffffff" stroke="#bbbbbb" stroke-width="0.6"/>
+<text x="845" y="109" text-anchor="middle" font-size="10.5" fill="#333">alias</text>
+<rect x="501" y="143" width="115" height="18" rx="3" fill="#ffffff" stroke="#bbbbbb" stroke-width="0.6"/>
+<text x="559" y="157" text-anchor="middle" font-size="10.5" fill="#333">carga el champion</text>
+<rect x="260" y="367" width="41" height="18" rx="3" fill="#ffffff" stroke="#bbbbbb" stroke-width="0.6"/>
+<text x="280" y="381" text-anchor="middle" font-size="10.5" fill="#333">apply</text>
+<rect x="459" y="227" width="202" height="34" rx="3" fill="#ffffff" stroke="#bbbbbb" stroke-width="0.6"/>
+<text x="560" y="241" text-anchor="middle" font-size="10.5" fill="#333">models:/riesgo-credito@champion</text>
+<text x="560" y="257" text-anchor="middle" font-size="10.5" fill="#333">via host.docker.internal:5050</text>
+<rect x="395" y="435" width="60" height="18" rx="3" fill="#ffffff" stroke="#bbbbbb" stroke-width="0.6"/>
+<text x="425" y="449" text-anchor="middle" font-size="10.5" fill="#333">balancea</text>
+<rect x="486" y="435" width="103" height="18" rx="3" fill="#ffffff" stroke="#bbbbbb" stroke-width="0.6"/>
+<text x="537" y="449" text-anchor="middle" font-size="10.5" fill="#333">DNS del Service</text>
+</g></svg>
