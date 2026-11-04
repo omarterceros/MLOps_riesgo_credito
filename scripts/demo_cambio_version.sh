@@ -5,7 +5,14 @@
 NS="${1:-riesgo-credito}"; URL="http://localhost:30080"
 PY="${PY:-python}"
 
-version_servida() { curl -s "$URL/info" | sed -E 's/.*"version":([0-9]+).*"run_id":"([^"]+)".*/version \1, run \2/'; }
+version_servida() {   # reintenta: justo despues del rollout el Service puede devolver una respuesta vacia
+  for _ in $(seq 1 15); do
+    v=$(curl -s --max-time 5 "$URL/info" | sed -n -E 's/.*"version":([0-9]+).*"run_id":"([^"]+)".*/version \1, run \2/p')
+    [ -n "$v" ] && { echo "$v"; return; }
+    sleep 1
+  done
+  echo "sin respuesta"
+}
 
 echo "Antes:   /info -> $(version_servida)"
 echo "--- rollback: alias champion -> version 1 ---"
@@ -18,4 +25,5 @@ $PY scripts/cambiar_champion.py 2
 kubectl rollout restart deployment/riesgo-credito-api -n "$NS" >/dev/null
 kubectl rollout status deployment/riesgo-credito-api -n "$NS" --timeout=300s
 echo "Final:   /info -> $(version_servida)"
+sleep 8
 kubectl get pods -n "$NS" -l app=riesgo-credito-api
