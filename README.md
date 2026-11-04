@@ -1,8 +1,8 @@
-# riesgo-credito-mlops
+﻿# riesgo-credito-mlops
 
 Proyecto final del módulo **ML-Ops y Puesta en Producción** (MIAV1E414, Maestría en IA, UAGRM).
 Autor: **Omar Terceros Vallejos** (trabajo individual).
-Repositorio: _(pendiente de publicar; `scripts\publicar_repo.ps1 -Url <url>` lo sube y completa este enlace)_
+Repositorio: https://github.com/omarterceros/riesgo-credito-mlops
 
 Un modelo que predice si un cliente de tarjeta de crédito **entrará en mora el mes siguiente**,
 llevado desde el entrenamiento hasta un despliegue reproducible y observable:

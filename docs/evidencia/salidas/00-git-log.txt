@@ -1,4 +1,6 @@
 $ git log --oneline --date=short --format="%h %ad %s"
+2c8862c 2026-11-04 docs: precisar la estrategia de datos del reentrenamiento según la forma del concept drift
+4b7fb3d 2026-11-04 docs: informe regenerado y registro de commits actualizado
 6b2de67 2026-11-04 docs: con qué datos se reentrena según el tipo de drift (data drift: viejos más nuevos; concept drift: según la forma del cambio)
 f3ba341 2026-11-04 docs: informe regenerado y registro de commits actualizado
 88c5643 2026-11-04 docs: correcciones de la revisión final (selección de modelos, compuerta, probes, estrategias de despliegue, nivel de madurez)
