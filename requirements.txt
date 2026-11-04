@@ -1,0 +1,5 @@
+# Entorno completo: entrenamiento, monitoreo de drift y pruebas (Python 3.13)
+-r requirements-servicio.txt
+matplotlib==3.11.2
+pytest==9.2.0
+httpx==0.28.1

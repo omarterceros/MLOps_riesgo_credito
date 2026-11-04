@@ -1,0 +1,17 @@
+.venv
+.git
+.github
+__pycache__
+.pytest_cache
+mlflow
+mlruns
+datos
+docs
+entrenamiento
+monitoreo
+tests
+k8s
+ui
+scripts
+*.md
+*.zip

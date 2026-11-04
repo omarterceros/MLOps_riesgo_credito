@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+mlflow/
+mlruns/
+monitoreo/salidas/
+docs/herramientas/node_modules/
+docs/evidencia/capturas/*.html
+*.zip
