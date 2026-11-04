@@ -1,0 +1,175 @@
+apiVersion: v1
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="es">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Riesgo crediticio - demo</title>
+      <style>
+        :root { --azul: #1f4e79; --rojo: #c0392b; --verde: #1e8449; --gris: #666; }
+        body { font-family: system-ui, Segoe UI, sans-serif; background: #f3f5f8; color: #222; margin: 0; }
+        main { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+        h1 { font-size: 1.4rem; margin: 0 0 4px; color: var(--azul); }
+        .sub { color: var(--gris); margin: 0 0 16px; font-size: .92rem; }
+        .fila { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+        .tarjeta { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px #0002; margin-bottom: 16px; }
+        .campos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 12px; }
+        label { font-size: .78rem; color: var(--gris); display: block; }
+        input { width: 100%; box-sizing: border-box; padding: 5px 6px; border: 1px solid #ccd; border-radius: 6px; font-size: .9rem; }
+        button { padding: 8px 14px; border: 0; border-radius: 6px; background: var(--azul); color: #fff; cursor: pointer; font-size: .9rem; margin: 10px 8px 0 0; }
+        button.sec { background: #eef2f7; color: var(--azul); }
+        .resultado { font-size: 2.2rem; font-weight: 700; margin: 6px 0; }
+        .mora { color: var(--rojo); } .sin-mora { color: var(--verde); }
+        .barra { height: 12px; background: #e5e9f0; border-radius: 6px; overflow: hidden; }
+        .barra div { height: 100%; background: linear-gradient(90deg, var(--verde), #f1c40f, var(--rojo)); }
+        code, pre { background: #f1f3f6; border-radius: 4px; padding: 2px 5px; font-size: .82rem; }
+        pre { padding: 10px; overflow: auto; max-height: 220px; }
+        table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+        td, th { padding: 4px 8px; border-bottom: 1px solid #eee; text-align: left; }
+        .meta { font-size: .85rem; color: var(--gris); line-height: 1.6; }
+      </style>
+    </head>
+    <body>
+    <main>
+      <h1>Riesgo crediticio: &iquest;el cliente entrar&aacute; en mora el mes que viene?</h1>
+      <p class="sub">Interfaz que consume la API desplegada en Kubernetes a trav&eacute;s del Service <code>riesgo-credito-api</code>. Cada respuesta dice qu&eacute; pod la atendi&oacute; y qu&eacute; versi&oacute;n del Model Registry de MLflow la produjo.</p>
+
+      <div class="fila">
+        <div>
+          <div class="tarjeta">
+            <strong>Datos del solicitante</strong>
+            <div class="campos" id="campos"></div>
+            <button class="sec" onclick="cargarEjemplo('bajo_riesgo')">Ejemplo bajo riesgo</button>
+            <button class="sec" onclick="cargarEjemplo('alto_riesgo')">Ejemplo alto riesgo</button>
+            <button onclick="predecir()">Predecir</button>
+            <button onclick="rafaga(12)">R&aacute;faga de 12 peticiones (balanceo)</button>
+          </div>
+        </div>
+        <div>
+          <div class="tarjeta">
+            <strong>Resultado</strong>
+            <p class="resultado" id="veredicto">&hellip;</p>
+            <div class="barra"><div id="barra" style="width:0%"></div></div>
+            <p class="meta" id="detalle"></p>
+          </div>
+          <div class="tarjeta">
+            <strong>Modelo en producci&oacute;n</strong>
+            <p class="meta" id="modelo">cargando&hellip;</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tarjeta" id="tarjeta-rafaga" style="display:none">
+        <strong>Balanceo de carga: qu&eacute; pod atendi&oacute; cada petici&oacute;n</strong>
+        <table><thead><tr><th>#</th><th>pod</th><th>probabilidad</th></tr></thead><tbody id="rafaga"></tbody></table>
+        <p class="meta" id="rafaga-resumen"></p>
+      </div>
+
+      <div class="tarjeta">
+        <strong>&Uacute;ltima respuesta de la API (JSON)</strong>
+        <pre id="json">&hellip;</pre>
+      </div>
+    </main>
+
+    <script>
+      const API = "/api";          // nginx lo reenvia al Service riesgo-credito-api dentro del cluster
+      let ejemplos = {};
+
+      async function iniciar() {
+        const esquema = await (await fetch(`${API}/esquema`)).json();
+        ejemplos = esquema.ejemplos;
+        const cont = document.getElementById("campos");
+        for (const c of esquema.columnas) {
+          cont.insertAdjacentHTML("beforeend",
+            `<div><label for="${c.nombre}">${c.nombre} <small>(${c.tipo})</small></label>
+             <input id="${c.nombre}" name="${c.nombre}" type="number" step="1"></div>`);
+        }
+        cargarEjemplo("bajo_riesgo");
+        cargarModelo();
+      }
+
+      function cargarEjemplo(nombre) {
+        for (const [k, v] of Object.entries(ejemplos[nombre])) document.getElementById(k).value = v;
+      }
+
+      function leerFormulario() {
+        const datos = {};
+        for (const input of document.querySelectorAll("#campos input")) datos[input.name] = Number(input.value);
+        return datos;
+      }
+
+      async function llamar() {
+        const r = await fetch(`${API}/predecir`, { method: "POST", headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify(leerFormulario()) });
+        const cuerpo = await r.json();
+        if (!r.ok) throw new Error(JSON.stringify(cuerpo));
+        return cuerpo;
+      }
+
+      async function predecir() {
+        try {
+          const res = await llamar();
+          const p = Math.round(res.probabilidad_mora * 100);
+          const v = document.getElementById("veredicto");
+          v.textContent = res.mora ? `MORA (${p} %)` : `SIN MORA (${p} %)`;
+          v.className = "resultado " + (res.mora ? "mora" : "sin-mora");
+          document.getElementById("barra").style.width = `${p}%`;
+          document.getElementById("detalle").innerHTML =
+            `Atendi&oacute; el pod <code>${res.pod}</code> &middot; modelo <code>${res.modelo.nombre}@${res.modelo.alias}</code> ` +
+            `= versi&oacute;n ${res.modelo.version} &middot; run <code>${res.modelo.run_id}</code>`;
+          document.getElementById("json").textContent = JSON.stringify(res, null, 2);
+        } catch (e) {
+          document.getElementById("veredicto").textContent = "error";
+          document.getElementById("json").textContent = e.message;
+        }
+      }
+
+      async function rafaga(n) {
+        const cuerpo = document.getElementById("rafaga");
+        cuerpo.innerHTML = "";
+        document.getElementById("tarjeta-rafaga").style.display = "block";
+        const conteo = {};
+        for (let i = 1; i <= n; i++) {
+          const res = await llamar();
+          conteo[res.pod] = (conteo[res.pod] || 0) + 1;
+          cuerpo.insertAdjacentHTML("beforeend", `<tr><td>${i}</td><td><code>${res.pod}</code></td><td>${res.probabilidad_mora}</td></tr>`);
+        }
+        document.getElementById("rafaga-resumen").textContent =
+          "Pods distintos: " + Object.keys(conteo).length + " -> " +
+          Object.entries(conteo).map(([k, v]) => `${k}: ${v}`).join(" | ");
+      }
+
+      async function cargarModelo() {
+        try {
+          const info = await (await fetch(`${API}/info`)).json();
+          const m = info.modelo;
+          document.getElementById("modelo").innerHTML =
+            `Registro: <code>${m.uri}</code><br>Versi&oacute;n: <strong>${m.version}</strong> &middot; run: <code>${m.run_id}</code> (${m.run_name})<br>` +
+            `MLflow: <code>${info.mlflow_tracking_uri}</code> &middot; umbral de mora: ${info.umbral}`;
+        } catch (e) { document.getElementById("modelo").textContent = "sin conexion con la API"; }
+      }
+
+      iniciar();
+    </script>
+    </body>
+    </html>
+  nginx.conf: |
+    server {
+        listen 80;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # Todo lo que empieza con /api/ va al Service de la API por DNS del cluster
+        location /api/ {
+            proxy_pass http://riesgo-credito-api.riesgo-credito.svc.cluster.local/;
+            proxy_set_header Host $host;
+            proxy_connect_timeout 5s;
+            proxy_read_timeout 30s;
+        }
+    }
+kind: ConfigMap
+metadata:
+  name: ui-archivos
+  namespace: riesgo-credito

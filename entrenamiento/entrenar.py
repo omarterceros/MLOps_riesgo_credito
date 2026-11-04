@@ -147,12 +147,16 @@ def entrenar_todo(tracking_uri: str) -> pd.DataFrame:
             mlflow.log_text(classification_report(y_test, (prob >= 0.5).astype(int)), "reporte_clasificacion.txt")
 
             firma = infer_signature(X_train.head(100), pipeline.predict_proba(X_train.head(100)))
+            # MLflow 3 serializa sklearn con skops (formato seguro): los arboles de random forest
+            # usan el tipo sklearn.tree._tree.Tree, que hay que declarar como confiable. La lista
+            # queda guardada en el MLmodel y el servicio la reutiliza al cargar.
             info = mlflow.sklearn.log_model(
                 sk_model=pipeline,
                 name=NOMBRE_MODELO_EN_RUN,
                 signature=firma,
                 input_example=X_train.head(3),
                 pyfunc_predict_fn="predict_proba",
+                skops_trusted_types=["sklearn.tree._tree.Tree"],
             )
             mlflow.set_tag("modelo_id", info.model_id)
 
