@@ -144,7 +144,7 @@ def graficar(tabla: pd.DataFrame, auc_referencia: float, alarma, salida: Path) -
     ax1.axhline(auc_referencia, color=GRIS, linewidth=1.2, linestyle="--")
     ax1.axhline(umbral, color=ROJO, linewidth=1.2, linestyle=":")
     ax1.plot(lotes, tabla["roc_auc"], color=AZUL, linewidth=2, marker="o", markersize=6, zorder=3)
-    ax1.text(0.6, auc_referencia + 0.004, f"referencia (test al entrenar) = {auc_referencia:.3f}", color="#52514e", fontsize=9)
+    ax1.text(9.55, auc_referencia + 0.005, f"referencia (test al entrenar) = {auc_referencia:.3f}", color="#52514e", fontsize=9)
     ax1.text(0.6, umbral - 0.014, f"umbral de alarma = referencia - {CAIDA_MAXIMA:.2f}", color=ROJO, fontsize=9)
     ax1.text(INICIO_DRIFT - 0.4, ax1.get_ylim()[1] if False else tabla["roc_auc"].max() + 0.012,
              "regla nueva desde el lote 7\n(etiquetas reasignadas, X identico)", color="#52514e", fontsize=9, va="bottom")
