@@ -82,14 +82,14 @@ riesgo-credito-mlops/
 ├── comun/            esquema.py (23 variables, tipos, ejemplos) · datos.py (carga, md5, partición)
 ├── datos/            descargar.py · credito.csv
 ├── entrenamiento/    entrenar.py (8 runs) · registrar.py (registry, alias) · modelo_desplegado.json
-├── servicio/         api.py (FastAPI: /predecir, /health, /info, /esquema)
+├── servicio/         api.py (FastAPI: /predecir, /health, /vivo, /info, /esquema)
 ├── Dockerfile        imagen del servicio (python:3.13-slim, usuario sin privilegios)
 ├── k8s/              00 namespace · 01 configmap · 02 deployment · 03 service · 04-05 UI
 ├── ui/               index.html + nginx.conf (proxy /api/ -> Service)
 ├── monitoreo/        validar_datos.py · data_drift.py · lotes.py · concept_drift.py · lotes/*.csv · salidas/
 ├── tests/            24 pruebas (API, validación de datos, data drift, concept drift, puerta del lote)
-├── scripts/          mlflow_server · entrenar_y_registrar · desplegar_k8s · demo_balanceo
-└── docs/             informe (Word), evidencia (capturas y salidas de terminal), herramientas
+├── scripts/          mlflow_server · entrenar_y_registrar · desplegar_k8s · demo_balanceo · demo_autorreparacion · demo_cambio_version · cambiar_champion · generar_configmap_ui · publicar_repo
+└── docs/             informe (Word), diagramas (draw.io/SVG/PNG), evidencia (capturas y salidas de terminal), postman (colección de la API), herramientas
 ```
 
 ## Probar la API

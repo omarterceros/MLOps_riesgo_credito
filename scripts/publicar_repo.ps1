@@ -16,7 +16,10 @@ Push-Location docs\herramientas
 node build_informe.js
 Pop-Location
 
-# 3) Commit y push de todo el historial
+# 3) Rearmar el zip de entrega con el README y el informe ya enlazados
+& .\.venv\Scripts\python.exe docs\herramientas\armar_zip.py
+
+# 4) Commit y push de todo el historial
 git add docs\REPO_URL.txt README.md docs\Informe_ProyectoFinal_MLOps.docx
 git commit -m "docs: enlace al repositorio publicado"
 if (-not (git remote | Select-String -Quiet '^origin$')) { git remote add origin $Url }

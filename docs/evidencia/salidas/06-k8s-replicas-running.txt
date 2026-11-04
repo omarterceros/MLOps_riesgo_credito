@@ -1,11 +1,10 @@
 $ kubectl get pods -n riesgo-credito -l app=riesgo-credito-api -o wide
-NAME                                  READY   STATUS        RESTARTS   AGE   IP          NODE             NOMINATED NODE   READINESS GATES
-riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Terminating   0          16m   10.1.0.34   docker-desktop   <none>           <none>
-riesgo-credito-api-7fdfb4b46f-gldcz   1/1     Running       0          25s   10.1.0.42   docker-desktop   <none>           <none>
-riesgo-credito-api-7fdfb4b46f-qmw8c   1/1     Running       0          9s    10.1.0.44   docker-desktop   <none>           <none>
-riesgo-credito-api-7fdfb4b46f-x49qk   1/1     Running       0          17s   10.1.0.43   docker-desktop   <none>           <none>
+NAME                                 READY   STATUS    RESTARTS        AGE   IP          NODE             NOMINATED NODE   READINESS GATES
+riesgo-credito-api-9cf758bf8-6mxj5   1/1     Running   1 (4h19m ago)   10h   10.1.0.68   docker-desktop   <none>           <none>
+riesgo-credito-api-9cf758bf8-llk4w   1/1     Running   1 (4h19m ago)   10h   10.1.0.61   docker-desktop   <none>           <none>
+riesgo-credito-api-9cf758bf8-wz2cc   1/1     Running   1 (4h19m ago)   10h   10.1.0.71   docker-desktop   <none>           <none>
 
 $ kubectl get endpointslices -n riesgo-credito -l kubernetes.io/service-name=riesgo-credito-api
-NAME                       ADDRESSTYPE   PORTS   ENDPOINTS                                   AGE
-riesgo-credito-api-kmkfk   IPv4          8000    10.1.0.34,10.1.0.42,10.1.0.43 + 1 more...   22m
+NAME                       ADDRESSTYPE   PORTS   ENDPOINTS                       AGE
+riesgo-credito-api-kmkfk   IPv4          8000    10.1.0.61,10.1.0.71,10.1.0.68   11h
 

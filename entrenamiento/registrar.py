@@ -30,9 +30,10 @@ ALIAS_BASE = "baseline"
 ARCHIVO_DESPLEGADO = RAIZ / "entrenamiento" / "modelo_desplegado.json"
 
 # Compuerta de calidad (quality gate): ningun modelo llega a champion si no supera este
-# roc_auc minimo Y al champion actual (si existe). 0.75 = el modelo base logistico (0.71) mas
-# un margen de ~2 errores estandar del AUC con 6.000 clientes (~0.015): el candidato tiene que
-# ser claramente mejor que el modelo simple, no apenas distinto.
+# roc_auc minimo Y al champion actual (si existe). 0.75 = piso redondeado y conservador: el modelo base
+# logistico (0.71) mas 0.04, unas 4-5 veces el error estandar del AUC con 6.000 clientes (~0.0086,
+# Hanley-McNeil; con 2 errores estandar el piso seria ~0.727): el candidato tiene que ser
+# claramente mejor que el modelo simple, no apenas distinto.
 ROC_AUC_MINIMO = 0.75
 
 

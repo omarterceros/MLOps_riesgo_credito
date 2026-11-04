@@ -86,12 +86,16 @@ más simple que gana.
 | Línea base trivial | clase mayoritaria | rival mínimo: exactitud 0,78 sin servir para nada | 0,500 | 0,221 | — |
 | 1 · línea base | regresión logística, C = 0.01 / 0.1 / 1 | obligatoria en toda clasificación: probabilidad e interpretación; tres órdenes de magnitud de C para mostrar que el techo es la linealidad, no la regularización | 0,710 | 0,495 | versión 1 `baseline` (rollback) |
 | 2 · modelo sólido | random forest, 100 árboles/prof. 8 y 200/prof. 12 | escalón 2 por defecto en tablas: no linealidades e interacciones casi sin ajustar; dos tamaños para ver que crecer ya no aporta (0,7734 → 0,7739) | 0,774 | 0,556 | gana con claridad (+0,064): se sube |
-| 3 · modelo exigente | hist gradient boosting, lr 0.05/0.1, 200/400 it., prof. 4 | solo porque el bosque ganó y quedaba margen; variante *hist* (histogramas, como LightGBM) por latencia; early stopping automático | 0,780 | 0,557 | gana por poco en ambas y entrena en 0,4 s: versión 2 `champion` |
+| 3 · modelo exigente | hist gradient boosting, lr 0.05/0.1, profundidad libre o 4 (max_iter es tope: el early stopping paró en 103/49/104 árboles) | solo porque el bosque ganó y quedaba margen; variante *hist* (histogramas, como LightGBM) por latencia | 0,780 | 0,557 | ganancia pequeña y no concluyente; la inclina la latencia de predicción (~6 ms frente a ~50 ms por fila): versión 2 `champion` |
 | Descartados | MLP / deep learning; KNN, Naive Bayes, SVM con kernel, árbol único | no son escalón de la escalera tabular, no escalan a 24.000 filas o no ganan a los árboles | — | — | no evaluados |
 
 Dentro de cada familia las diferencias son de milésimas y entre familias de centésimas: la
-familia pesa más que el ajuste fino. El paso del bosque al boosting está dentro del error de
-muestreo (~0,007 con 6.000 clientes) y se declara como tal: el bosque sería igualmente
+familia pesa más que el ajuste fino. El paso del bosque al boosting es una ganancia pequeña y no concluyente (+0,006 de roc_auc; la
+prueba pareada de DeLong da z ≈ 2,5, pero el champion se eligió mirando esta misma prueba entre
+cinco modelos de árboles y no hay validación cruzada). Por la regla de la escalera, ante un empate
+queda el más simple; lo que inclina al boosting es la restricción declarada de latencia: predice
+una fila en unos 6 ms frente a unos 50 ms del bosque de 200 árboles (medido en esta laptop; no es
+una métrica del run), sin perder en ninguna métrica registrada. El bosque sería igualmente
 defendible. Todos los runs comparten partición y métricas para poder argumentar la elección con la
 vista de comparación de MLflow y no "porque fue el primero que vi". El preprocesamiento (one-hot
 de SEX/EDUCATION/MARRIAGE y escalado) va dentro del pipeline, así lo que se empaqueta es el
@@ -117,7 +121,7 @@ no lo reinicia (reiniciarlo no arreglaría nada y provocaría un CrashLoopBackOf
 
 **Kubernetes.** Namespace propio, Deployment con 3 réplicas (alta disponibilidad), `POD_NAME`
 inyectado por `fieldRef` para demostrar el balanceo, `requests`/`limits` porque los modelos
-consumen memoria, readiness/liveness sobre `/health`, y rolling update con `maxSurge: 1` /
+consumen memoria, readiness sobre `/health` (tráfico solo con el modelo cargado) y liveness sobre `/vivo` (reinicia solo si el proceso dejó de responder), y rolling update con `maxSurge: 1` /
 `maxUnavailable: 0` para cambiar de versión sin cortar el servicio. El Service NodePort reparte
 las conexiones entre los pods.
 
@@ -147,7 +151,7 @@ producción:
 | Modelo | Compuerta de calidad al registrar: un candidato solo toma el alias `champion` si su roc_auc ≥ 0.75 **y** supera al champion actual; si no, el alias no se mueve | `entrenamiento/registrar.py` |
 
 **Disparadores de reentrenamiento** (los tres de la clase): por tiempo (un CT programado,
-por ejemplo semanal, como el `ct.yml` de la heladería del docente), por rendimiento (la
+por ejemplo semanal, como el `ct.yml` de la heladería del docente; no implementado en este proyecto), por rendimiento (la
 métrica real del lote cae: es el criterio de concept drift, 0.05 sostenido 3 lotes) y por
 drift de datos (en este proyecto el data drift rojo no reentrena solo: investiga y vigila,
 porque un cambio en X no implica que la regla haya cambiado). El reentrenamiento produce un
@@ -155,9 +159,11 @@ challenger que pasa por la misma compuerta antes de reemplazar al champion.
 
 **Estrategias de despliegue.** El Deployment usa rolling update con `maxSurge: 1` y
 `maxUnavailable: 0`: nunca hay menos de 3 pods listos y, si la versión nueva no carga, los
-pods viejos siguen sirviendo (rollback con `kubectl rollout undo` o moviendo el alias). Es la
-forma básica de blue-green progresivo. Un canary real (10 % del tráfico al challenger) se haría
-con un segundo Deployment de 1 réplica con la misma etiqueta `app` detrás del mismo Service (o
+pods viejos siguen sirviendo (rollback con `kubectl rollout undo` o moviendo el alias). No es
+blue-green estricto (no hay dos entornos gemelos), aunque comparte con él el rollback rápido. Como
+cambiar el modelo es un riesgo de comportamiento, lo indicado según la clase es canary; blue-green
+(dos entornos completos, el doble de costo) se reserva para riesgo de infraestructura. Un canary
+real (10 % del tráfico al challenger) se haría con un segundo Deployment de 1 réplica con la misma etiqueta `app` detrás del mismo Service (o
 con un ingress con pesos); un A/B testing compararía la métrica de negocio de ambos con una
 prueba estadística antes de decidir. No se implementaron porque el enunciado no lo pide.
 
@@ -203,8 +209,9 @@ confirman la caída.
 
 **Limitaciones reconocidas.** El champion se eligió sobre el conjunto de prueba, sin validación
 separada ni validación cruzada, y los modelos de árboles están a menos de 0.007 de roc_auc entre
-sí (dentro del error de muestreo); un desempate riguroso usaría validación cruzada estratificada
-registrada en MLflow. HistGradientBoosting aplica early stopping automático con más de 10.000
+sí: la diferencia champion-bosque es pequeña y no concluyente (DeLong pareado z ≈ 2,5, inflado por
+elegir sobre la misma prueba); un desempate riguroso usaría validación cruzada estratificada o
+bootstrap registrados en MLflow. HistGradientBoosting aplica early stopping automático con más de 10.000
 filas: `max_iter` es un tope (el champion se detuvo en 104 iteraciones). Las variables ordinales
 PAY_* se tratan como categóricas (chi-cuadrado + PSI); una alternativa sensible al orden sería
 KS o Mann-Whitney sobre los códigos.

@@ -3,7 +3,8 @@
 # rollback del alias champion a la version 1 (baseline), rolling update, y vuelta a la version 2.
 # Uso: scripts/demo_cambio_version.sh [namespace]
 NS="${1:-riesgo-credito}"; URL="http://localhost:30080"
-PY="${PY:-python}"
+# python del entorno virtual del proyecto (tiene mlflow); se puede sobrescribir con PY=...
+PY="${PY:-$(cd "$(dirname "$0")/.." && pwd)/.venv/Scripts/python.exe}"
 
 version_servida() {   # reintenta: justo despues del rollout el Service puede devolver una respuesta vacia
   for _ in $(seq 1 15); do
