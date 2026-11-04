@@ -1,4 +1,5 @@
 $ python monitoreo/data_drift.py --lote monitoreo/lotes/lote_derivado.csv --salida monitoreo/salidas; echo "codigo de salida: $?"
+Validacion de datos: OK (1500 filas; esquema, nulos y rangos correctos)
 Lote: monitoreo/lotes/lote_derivado.csv (1500 filas) contra baseline de entrenamiento
 Umbrales: alfa=0.01, PSI vigilar>=0.1, PSI critico>=0.25, efecto minimo>=0.1
 

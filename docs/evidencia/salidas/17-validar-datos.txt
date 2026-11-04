@@ -1,0 +1,10 @@
+$ python monitoreo/validar_datos.py monitoreo/lotes/lote_normal.csv; echo "codigo de salida: $?"
+OK: monitoreo/lotes/lote_normal.csv paso la validacion de datos (esquema, nulos, rangos, filas)
+codigo de salida: 0
+
+$ python monitoreo/validar_datos.py monitoreo/lotes/lote_invalido.csv; echo "codigo de salida: $?"
+ERROR: hay 5 celdas vacias en ['AGE']
+ERROR: SEX: 5 valores fuera del rango [1, 2]
+ERROR: PAY_AMT1: 3 valores fuera del rango [0, None]
+codigo de salida: 1
+
