@@ -1,0 +1,20 @@
+$ git log --oneline --date=short --format="%h %ad %s"
+6f30fe4 2026-11-04 docs: diagramas en draw.io/SVG/PNG (arquitectura, ciclo de vida, monitoreo, Kubernetes) en el informe
+037a772 2026-11-04 docs(evidencia): validacion de datos, compuerta de calidad e informe regenerado
+2863ce1 2026-11-04 docs: validacion de datos antes del drift y respuestas de la clase 7 en la arquitectura
+2b9d116 2026-11-04 feat(monitoreo): validacion de datos (pilar de datos) y compuerta de calidad al promover el champion
+ed53934 2026-11-04 docs(evidencia): autorreparacion con trafico concurrente, cambio de version por alias, filtro en MLflow e informe regenerado
+8409500 2026-11-04 fix(scripts): la demo de cambio de version reintenta /info tras el rollout
+bb99162 2026-11-04 fix: liveness separada (/vivo), autorreparacion con trafico concurrente, cambio de version por alias y correcciones del informe
+3156638 2026-11-04 docs: informe del proyecto final (Word generado desde los resultados reales) y grafica de concept drift ajustada
+a90e050 2026-11-04 docs(evidencia): capturas de MLflow, Docker, Kubernetes, interfaz web y drift, con sus salidas de terminal
+7d95ad2 2026-11-04 feat: registro champion/baseline ejecutado, concept drift calibrado y documentacion de arquitectura
+409dd6c 2026-11-04 fix(mlflow): tipo TreePredictor de hist gradient boosting tambien confiable para skops; herramientas de evidencia
+68b51e0 2026-11-04 fix(mlflow): tipo sklearn.tree._tree.Tree confiable para skops y servidor con un solo worker
+ce39a89 2026-11-04 feat(monitoreo): concept drift simulado, criterio de reentrenamiento y grafica temporal
+8f7231c 2026-11-04 feat(monitoreo): data drift con KS/PSI y chi2/PSI, lotes de prueba y puerta verde/rojo
+150e371 2026-11-04 feat(k8s): namespace, deployment con 3 replicas, service NodePort e interfaz web
+be1a323 2026-11-04 feat(servicio): API FastAPI que carga models:/riesgo-credito@champion desde el registro
+5feaaad 2026-11-04 feat(mlflow): entrenamiento con 8 runs comparables y registro champion/baseline
+d5ae702 2026-11-04 feat(datos): esquema de 23 variables, descarga del dataset UCI y particion reproducible
+995aa81 2026-11-04 chore: esqueleto del repositorio y dependencias fijadas por version
