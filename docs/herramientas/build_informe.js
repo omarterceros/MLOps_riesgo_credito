@@ -127,7 +127,7 @@ const add = (...x) => x.flat().forEach((e) => children.push(e));
 add(
   new Paragraph({ text: "Proyecto final: un modelo de riesgo crediticio llevado a producción con MLflow, Docker y Kubernetes, con pruebas de data drift y concept drift", heading: HeadingLevel.TITLE, spacing: { after: 120 } }),
   p("MIAV1E414 — ML-Ops y Puesta en Producción · Semana 4 · Proyecto final", { italics: true, size: 22 }),
-  p("Omar Terceros Vallejos · trabajo individual", { size: 22 }),
+  p("Omar Terceros Vallejos y Sergio Driss Meléndez · grupo de dos", { size: 22 }),
   pr([b("Repositorio: "), mono(REPO_URL)]),
   pr([b("Modelo desplegado: "), mono(`${M.uri} = versión ${M.version}, run ${M.run_id} (${M.run_name}), roc_auc ${f4(M.roc_auc)}`)]),
   espacio(),
@@ -139,7 +139,7 @@ add(
   p("Cómo leer el diagrama: la zona superior es la máquina anfitriona (datos, entrenamiento, el servidor de MLflow con tracking, registry e interfaz, y el monitoreo); la inferior es el clúster de Kubernetes. Las flechas sólidas son flujo de datos o de peticiones; las punteadas son lecturas o escrituras del Model Registry. entrenar.py envía los runs al servidor; registrar.py lee el mejor run, aplica la compuerta de calidad y escribe el alias champion. La imagen Docker no contiene el modelo: cada pod del Deployment lo carga por alias desde host.docker.internal:5050 al arrancar y hasta entonces no recibe tráfico (readiness). El Service de la API (NodePort 30080) balancea entre los pods Ready; la interfaz (nginx) hace proxy de /api/ a ese Service por DNS interno y se expone en el NodePort 30081. Cada respuesta trae el pod que atendió y la versión y run_id del modelo: la trazabilidad cruza las dos zonas. El monitoreo (validación de datos, data drift, concept drift) carga el champion desde el registro para evaluar los lotes, fuera del camino de la petición."),
 
   h1("2. Modalidad y reparto de trabajo"),
-  p("Trabajo individual. La tabla indica los componentes y quién los construyó; el historial de commits del repositorio (git log) está organizado por componente."),
+  p("Grupo de dos integrantes. La tabla indica los componentes y quién los construyó. El código y la redacción están en los commits de Omar, organizados por componente (git log); los aportes de Sergio (ajustes de documentación y resultados de Postman) se registran con sus propios commits."),
   tabla(["Componente", "Qué incluye", "Integrante"], [
     ["Datos y esquema", "comun/esquema.py, comun/datos.py, datos/descargar.py, datos/credito.csv", "Omar Terceros"],
     ["Fase 1 · MLflow", "entrenamiento/entrenar.py (8 runs), entrenamiento/registrar.py (registry y alias)", "Omar Terceros"],
@@ -147,7 +147,8 @@ add(
     ["Fase 3 · Kubernetes", "k8s/*.yaml (namespace, configmap, deployment, service, UI), scripts/", "Omar Terceros"],
     ["Fase 4 · Drift", "monitoreo/data_drift.py, lotes.py, concept_drift.py y tests/", "Omar Terceros"],
     ["Extra · Interfaz", "ui/index.html, ui/nginx.conf, k8s/04-05 UI", "Omar Terceros"],
-    ["Documentación", "README.md, ARQUITECTURA.md, este informe y las evidencias", "Omar Terceros"],
+    ["Documentación", "README.md, ARQUITECTURA.md, este informe y las evidencias; análisis CRISP-DM y guía de defensa", "Omar Terceros (redacción); Sergio Driss Meléndez (revisión y ajuste)"],
+    ["Pruebas funcionales con Postman", "docs/postman/ (colección y resultados de la ejecución contra la API desplegada)", "Sergio Driss Meléndez"],
   ], { cols: [2200, 5400, 1700] }),
   espacio(),
   p("Historial de commits (git log, del más reciente al más antiguo; el registro se tomó al generar este informe, así que el commit que lo actualiza se ve solo en el repositorio). Nota sobre el historial: el código se desarrolló y probó primero en local y los siete primeros commits se crearon por componente al consolidar el trabajo (por eso comparten hora); los siguientes reflejan las iteraciones reales del día (ajustes de MLflow 3, calibración del concept drift, evidencias, informe y correcciones de la revisión)."),

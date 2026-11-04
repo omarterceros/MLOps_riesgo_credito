@@ -1,7 +1,7 @@
 ﻿# riesgo-credito-mlops
 
 Proyecto final del módulo **ML-Ops y Puesta en Producción** (MIAV1E414, Maestría en IA, UAGRM).
-Autor: **Omar Terceros Vallejos** (trabajo individual).
+Integrantes: **Omar Terceros Vallejos** y **Sergio Driss Meléndez** (grupo de dos).
 Repositorio: https://github.com/omarterceros/MLOps_riesgo_credito
 
 Un modelo que predice si un cliente de tarjeta de crédito **entrará en mora el mes siguiente**,
@@ -127,9 +127,18 @@ pytest tests/test_lote_produccion.py --lote monitoreo/lotes/lote_derivado.csv  -
 
 ## Reparto de trabajo
 
-Trabajo individual: todos los componentes (datos y MLflow, servicio y Docker, Kubernetes y UI,
-monitoreo de drift, documentación) fueron construidos por Omar Terceros Vallejos. El historial
-de commits (`git log`) está organizado por componente: los siete primeros se crearon al
+| Componente | Qué incluye | Integrante |
+|---|---|---|
+| Datos, modelos y MLflow | `datos/`, `comun/`, `entrenamiento/` (8 runs, compuerta de calidad, registro y alias) | Omar Terceros Vallejos |
+| Servicio y Docker | `servicio/api.py`, `Dockerfile`, `requirements-servicio.txt` | Omar Terceros Vallejos |
+| Kubernetes e interfaz | `k8s/`, `ui/`, `scripts/` (demos de réplicas, balanceo, autorreparación, escalado y cambio de versión) | Omar Terceros Vallejos |
+| Monitoreo de drift y pruebas | `monitoreo/` (validación de datos, data drift, concept drift), `tests/` | Omar Terceros Vallejos |
+| Documentación | README, ARQUITECTURA.md, informe Word, diagramas y evidencias; análisis CRISP-DM y guía de defensa | Omar Terceros Vallejos (redacción) · Sergio Driss Meléndez (revisión y ajuste del informe, del análisis CRISP-DM y de la guía de defensa) |
+| Pruebas funcionales de la API con Postman | `docs/postman/` (colección y resultados de la ejecución contra la API desplegada) | Sergio Driss Meléndez |
+
+El código y la redacción están en los commits de Omar; los aportes de Sergio (ajustes de documentación
+y resultados de Postman) se registran con sus propios commits. El historial de commits (`git log`)
+está organizado por componente: los siete primeros se crearon al
 consolidar el trabajo (por eso comparten hora) y los siguientes reflejan las iteraciones reales
 (ajustes de MLflow 3, calibración del concept drift, evidencias, informe y correcciones de la
 revisión).
