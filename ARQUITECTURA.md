@@ -128,11 +128,19 @@ con un segundo Deployment de 1 réplica con la misma etiqueta `app` detrás del 
 con un ingress con pesos); un A/B testing compararía la métrica de negocio de ambos con una
 prueba estadística antes de decidir. No se implementaron porque el enunciado no lo pide.
 
-**Tres capas de monitoreo.** Técnica (¿está vivo?): probes de Kubernetes, `kubectl get pods`,
-`kubectl top`. Datos y modelo (¿entiende el mundo de hoy?): data drift por variable, PSI del
-score, tasa de positivos predicha, roc_auc por lote cuando llegan las etiquetas. Negocio (¿genera
-valor?): tasa de mora real de la cartera aprobada, pérdida por mora frente al ingreso por
-créditos otorgados; es la capa que justifica el umbral de decisión y el reentrenamiento.
+**Tres capas de monitoreo.** Técnica (¿está vivo?): probes de Kubernetes, `kubectl get pods`
+y los restarts (`kubectl describe deployment`; en Docker Desktop no hay metrics-server, así que
+`kubectl top` no está disponible). Datos y modelo (¿entiende el mundo de hoy?): data drift por
+variable, PSI del score, tasa de positivos predicha, roc_auc por lote cuando llegan las etiquetas.
+Negocio (¿genera valor?): tasa de mora real de la cartera aprobada y pérdida esperada
+(probabilidad × monto) frente al ingreso por créditos otorgados; es la capa que justifica el
+umbral de decisión (`UMBRAL_MORA`, hoy 0.5 provisional) y el reentrenamiento; no se implementó
+porque el dataset no trae montos de pérdida.
+
+**Tipo de drift y frecuencia.** El escenario simulado es gradual (una crisis que se agrava mes a
+mes); el corte de 0.12 en un solo lote cubre un drift súbito y la regla de 3 lotes filtra un mes
+estacional. Con datos de tarjeta que llegan mensualmente, la evaluación y el posible
+reentrenamiento son mensuales.
 
 ## 5. Monitoreo de drift
 

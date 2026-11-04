@@ -30,8 +30,9 @@ ALIAS_BASE = "baseline"
 ARCHIVO_DESPLEGADO = RAIZ / "entrenamiento" / "modelo_desplegado.json"
 
 # Compuerta de calidad (quality gate): ningun modelo llega a champion si no supera este
-# roc_auc minimo Y al champion actual (si existe). 0.75 es el nivel que alcanzan los modelos
-# de arboles sobre este dataset en la literatura; la regresion logistica (0.71) no lo pasa.
+# roc_auc minimo Y al champion actual (si existe). 0.75 = el modelo base logistico (0.71) mas
+# un margen de ~2 errores estandar del AUC con 6.000 clientes (~0.015): el candidato tiene que
+# ser claramente mejor que el modelo simple, no apenas distinto.
 ROC_AUC_MINIMO = 0.75
 
 

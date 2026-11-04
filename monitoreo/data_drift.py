@@ -177,6 +177,16 @@ if __name__ == "__main__":
     args = ap.parse_args()
 
     lote = pd.read_csv(args.lote)
+
+    from monitoreo.validar_datos import validar   # pilar de datos: un lote roto no se evalua
+    problemas = validar(lote)
+    if problemas:
+        print(f"Lote {args.lote} RECHAZADO por la validacion de datos (no se evalua drift):")
+        for problema in problemas:
+            print(f"  ERROR: {problema}")
+        sys.exit(2)
+    print(f"Validacion de datos: OK ({len(lote)} filas; esquema, nulos y rangos correctos)")
+
     tabla, estado_global = evaluar_lote(referencia_entrenamiento(), lote)
     print(f"Lote: {args.lote} ({len(lote)} filas) contra baseline de entrenamiento")
     print(f"Umbrales: alfa={ALFA}, PSI vigilar>={PSI_VIGILAR}, PSI critico>={PSI_CRITICO}, efecto minimo>={EFECTO_MINIMO}\n")
