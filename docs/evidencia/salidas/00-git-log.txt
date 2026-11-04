@@ -1,4 +1,7 @@
 $ git log --oneline --date=short --format="%h %ad %s"
+88c5643 2026-11-04 docs: correcciones de la revisión final (selección de modelos, compuerta, probes, estrategias de despliegue, nivel de madurez)
+f872a23 2026-11-04 docs: justificar la selección de modelos con la escalera (línea base, sólido, exigente)
+32a183d 2026-11-04 docs: registro de commits e informe actualizados
 fd47533 2026-11-04 docs(evidencia): capturas de terminal con la ventana real de Git Bash (MINGW64) en Windows 11 y nota de como se tomaron
 82b107c 2026-11-04 docs: lectura guiada del diagrama de arquitectura en ARQUITECTURA.md y en el informe
 bb0d19d 2026-11-04 feat(datos): el dataset se toma de Kaggle (UCI_Credit_Card.csv) y se convierte al esquema del proyecto; coleccion de Postman para probar la API
@@ -22,3 +25,4 @@ be1a323 2026-11-04 feat(servicio): API FastAPI que carga models:/riesgo-credito@
 5feaaad 2026-11-04 feat(mlflow): entrenamiento con 8 runs comparables y registro champion/baseline
 d5ae702 2026-11-04 feat(datos): esquema de 23 variables, descarga del dataset UCI y particion reproducible
 995aa81 2026-11-04 chore: esqueleto del repositorio y dependencias fijadas por version
+
