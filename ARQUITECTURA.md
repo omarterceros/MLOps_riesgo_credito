@@ -157,6 +157,15 @@ drift de datos (en este proyecto el data drift rojo no reentrena solo: investiga
 porque un cambio en X no implica que la regla haya cambiado). El reentrenamiento produce un
 challenger que pasa por la misma compuerta antes de reemplazar al champion.
 
+**Con qué datos se reentrena.** Depende del drift. Ante data drift el modelo no está
+equivocado, le falta evidencia en la región nueva: no se descartan los datos viejos y, si se
+reentrena, es con viejos más nuevos. Ante concept drift los datos viejos enseñan la regla vieja:
+si el cambio es un corte limpio, se entrena con los lotes de la regla nueva; si es gradual, con
+una ventana deslizante reentrenada cada mes y más peso a lo reciente; si es estacional, el modelo
+viejo sigue sirviendo para su temporada (un modelo por régimen o variables de estacionalidad).
+En este proyecto el challenger se entrena con los lotes recientes ya etiquetados: la simulación
+es un cambio de regla desde el lote 7 que se agrava mes a mes.
+
 **Estrategias de despliegue.** El Deployment usa rolling update con `maxSurge: 1` y
 `maxUnavailable: 0`: nunca hay menos de 3 pods listos y, si la versión nueva no carga, los
 pods viejos siguen sirviendo (rollback con `kubectl rollout undo` o moviendo el alias). No es
