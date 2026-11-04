@@ -49,6 +49,10 @@ EXPERIMENTO = "riesgo-credito"
 NOMBRE_MODELO_EN_RUN = "modelo"
 NOMINALES = ["SEX", "EDUCATION", "MARRIAGE"]   # se codifican one-hot; el resto se escala
 TRACKING_URI_DEFECTO = "http://127.0.0.1:5050"
+TIPOS_CONFIABLES_SKOPS = [
+    "sklearn.tree._tree.Tree",                                            # random forest
+    "sklearn.ensemble._hist_gradient_boosting.predictor.TreePredictor",   # hist gradient boosting
+]
 
 # (nombre del run, familia, hiperparametros). De lo mas simple a lo mas complejo.
 CONFIGURACIONES = [
@@ -147,16 +151,16 @@ def entrenar_todo(tracking_uri: str) -> pd.DataFrame:
             mlflow.log_text(classification_report(y_test, (prob >= 0.5).astype(int)), "reporte_clasificacion.txt")
 
             firma = infer_signature(X_train.head(100), pipeline.predict_proba(X_train.head(100)))
-            # MLflow 3 serializa sklearn con skops (formato seguro): los arboles de random forest
-            # usan el tipo sklearn.tree._tree.Tree, que hay que declarar como confiable. La lista
-            # queda guardada en el MLmodel y el servicio la reutiliza al cargar.
+            # MLflow 3 serializa sklearn con skops (formato seguro): los nodos de los arboles
+            # (random forest y hist gradient boosting) son tipos que hay que declarar como
+            # confiables. La lista queda en el MLmodel y el servicio la reutiliza al cargar.
             info = mlflow.sklearn.log_model(
                 sk_model=pipeline,
                 name=NOMBRE_MODELO_EN_RUN,
                 signature=firma,
                 input_example=X_train.head(3),
                 pyfunc_predict_fn="predict_proba",
-                skops_trusted_types=["sklearn.tree._tree.Tree"],
+                skops_trusted_types=TIPOS_CONFIABLES_SKOPS,
             )
             mlflow.set_tag("modelo_id", info.model_id)
 
