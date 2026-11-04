@@ -1,32 +1,42 @@
 $ kubectl apply -f k8s/
 namespace/riesgo-credito unchanged
 configmap/api-config unchanged
-deployment.apps/riesgo-credito-api unchanged
+deployment.apps/riesgo-credito-api configured
 service/riesgo-credito-api unchanged
 configmap/ui-archivos unchanged
 deployment.apps/riesgo-credito-ui unchanged
 service/riesgo-credito-ui unchanged
 
 $ kubectl rollout status deployment/riesgo-credito-api -n riesgo-credito --timeout=300s
+Waiting for deployment "riesgo-credito-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-credito-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-credito-api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-credito-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-credito-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-credito-api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "riesgo-credito-api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "riesgo-credito-api" rollout to finish: 1 old replicas are pending termination...
 deployment "riesgo-credito-api" successfully rolled out
 
 $ kubectl get all -n riesgo-credito
-NAME                                      READY   STATUS    RESTARTS   AGE
-pod/riesgo-credito-api-76f8cd64ff-2hgdh   1/1     Running   0          42s
-pod/riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          62s
-pod/riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          50s
-pod/riesgo-credito-ui-d647cb6dd-dr6js     1/1     Running   0          6m51s
+NAME                                      READY   STATUS        RESTARTS   AGE
+pod/riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Terminating   0          16m
+pod/riesgo-credito-api-7fdfb4b46f-gldcz   1/1     Running       0          25s
+pod/riesgo-credito-api-7fdfb4b46f-qmw8c   1/1     Running       0          9s
+pod/riesgo-credito-api-7fdfb4b46f-x49qk   1/1     Running       0          17s
+pod/riesgo-credito-ui-d647cb6dd-dr6js     1/1     Running       0          22m
 
 NAME                         TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
-service/riesgo-credito-api   NodePort   10.101.99.231   <none>        80:30080/TCP   6m51s
-service/riesgo-credito-ui    NodePort   10.109.69.43    <none>        80:30081/TCP   6m51s
+service/riesgo-credito-api   NodePort   10.101.99.231   <none>        80:30080/TCP   22m
+service/riesgo-credito-ui    NodePort   10.109.69.43    <none>        80:30081/TCP   22m
 
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/riesgo-credito-api   3/3     3            3           6m51s
-deployment.apps/riesgo-credito-ui    1/1     1            1           6m51s
+deployment.apps/riesgo-credito-api   3/3     3            3           22m
+deployment.apps/riesgo-credito-ui    1/1     1            1           22m
 
 NAME                                            DESIRED   CURRENT   READY   AGE
-replicaset.apps/riesgo-credito-api-667c978c89   0         0         0       6m51s
-replicaset.apps/riesgo-credito-api-76f8cd64ff   3         3         3       62s
-replicaset.apps/riesgo-credito-ui-d647cb6dd     1         1         1       6m51s
+replicaset.apps/riesgo-credito-api-667c978c89   0         0         0       22m
+replicaset.apps/riesgo-credito-api-76f8cd64ff   0         0         0       16m
+replicaset.apps/riesgo-credito-api-7fdfb4b46f   3         3         3       25s
+replicaset.apps/riesgo-credito-ui-d647cb6dd     1         1         1       22m
 

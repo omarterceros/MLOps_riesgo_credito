@@ -1,13 +1,13 @@
 $ docker run -d --name credito-prueba -p 8001:8000 riesgo-credito-api:1.0
-f78abd13a6b810f5be5f3ab221d7f1f48a4a3abc16c1049db02f32667ce907e0
+641b93dd952e9a31ddcf429ae590edb75d6e2cc03f693cd7c2b647ef663cd5be
 
 $ for i in $(seq 1 30); do curl -s -o /dev/null -w '%{http_code}' http://localhost:8001/health | grep -q 200 && break; sleep 2; done; echo "listo tras $i intentos"
-listo tras 3 intentos
+listo tras 5 intentos
 
 $ curl -s http://localhost:8001/health
-{"status":"ok","pod":"f78abd13a6b8","modelo":{"nombre":"riesgo-credito","alias":"champion","uri":"models:/riesgo-credito@champion","version":2,"run_id":"f8dfebea1f6846ae8d62e0aca7711214","run_name":"hgb_lr0.1_400it_prof4"}}
+{"status":"ok","pod":"641b93dd952e","modelo":{"nombre":"riesgo-credito","alias":"champion","uri":"models:/riesgo-credito@champion","version":2,"run_id":"f8dfebea1f6846ae8d62e0aca7711214","run_name":"hgb_lr0.1_400it_prof4"}}
 $ curl -s -X POST http://localhost:8001/predecir -H 'Content-Type: application/json' -d '{"LIMIT_BAL":20000,"SEX":1,"EDUCATION":3,"MARRIAGE":1,"AGE":45,"PAY_0":3,"PAY_2":2,"PAY_3":2,"PAY_4":2,"PAY_5":2,"PAY_6":2,"BILL_AMT1":19500,"BILL_AMT2":19000,"BILL_AMT3":18800,"BILL_AMT4":18500,"BILL_AMT5":18200,"BILL_AMT6":18000,"PAY_AMT1":0,"PAY_AMT2":0,"PAY_AMT3":500,"PAY_AMT4":0,"PAY_AMT5":0,"PAY_AMT6":0}'
-{"mora":1,"probabilidad_mora":0.8064,"umbral":0.5,"pod":"f78abd13a6b8","modelo":{"nombre":"riesgo-credito","alias":"champion","uri":"models:/riesgo-credito@champion","version":2,"run_id":"f8dfebea1f6846ae8d62e0aca7711214","run_name":"hgb_lr0.1_400it_prof4"}}
+{"mora":1,"probabilidad_mora":0.8064,"umbral":0.5,"pod":"641b93dd952e","modelo":{"nombre":"riesgo-credito","alias":"champion","uri":"models:/riesgo-credito@champion","version":2,"run_id":"f8dfebea1f6846ae8d62e0aca7711214","run_name":"hgb_lr0.1_400it_prof4"}}
 $ docker logs credito-prueba 2>&1 | grep -E 'Modelo cargado|Uvicorn running'
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 INFO:     Modelo cargado: models:/riesgo-credito@champion -> version 2, run f8dfebea1f6846ae8d62e0aca7711214 (hgb_lr0.1_400it_prof4)

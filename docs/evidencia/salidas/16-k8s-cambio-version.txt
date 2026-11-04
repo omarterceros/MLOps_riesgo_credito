@@ -1,0 +1,17 @@
+$ bash scripts/demo_cambio_version.sh
+Antes:   /info -> version 2, run f8dfebea1f6846ae8d62e0aca7711214
+--- rollback: alias champion -> version 1 ---
+alias champion: version 2 (run f8dfebea1f6846ae8d62e0aca7711214) -> version 1 (run 80c50ee4bf67469b9b94c6ee97c5c0a1)
+Waiting for deployment "riesgo-credito-api" rollout to finish: 1 old replicas are pending termination...
+deployment "riesgo-credito-api" successfully rolled out
+Ahora:   /info -> version 1, run 80c50ee4bf67469b9b94c6ee97c5c0a1
+--- promocion: alias champion -> version 2 ---
+alias champion: version 1 (run 80c50ee4bf67469b9b94c6ee97c5c0a1) -> version 2 (run f8dfebea1f6846ae8d62e0aca7711214)
+Waiting for deployment "riesgo-credito-api" rollout to finish: 1 old replicas are pending termination...
+deployment "riesgo-credito-api" successfully rolled out
+Final:   /info -> version 2, run f8dfebea1f6846ae8d62e0aca7711214
+NAME                                 READY   STATUS    RESTARTS   AGE
+riesgo-credito-api-9cf758bf8-6mxj5   1/1     Running   0          34s
+riesgo-credito-api-9cf758bf8-llk4w   1/1     Running   0          25s
+riesgo-credito-api-9cf758bf8-wz2cc   1/1     Running   0          17s
+

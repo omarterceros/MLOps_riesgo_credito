@@ -1,6 +1,6 @@
-$ curl -s http://localhost:30080/info | .venv/Scripts/python.exe -m json.tool
+$ curl -s http://localhost:30080/info | python -m json.tool
 {
-    "pod": "riesgo-credito-api-76f8cd64ff-7rlv9",
+    "pod": "riesgo-credito-api-7fdfb4b46f-x49qk",
     "mlflow_tracking_uri": "http://host.docker.internal:5050",
     "umbral": 0.5,
     "modelo": {

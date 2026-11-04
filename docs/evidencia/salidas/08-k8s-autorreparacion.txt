@@ -1,29 +1,49 @@
-$ kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
+$ bash scripts/demo_autorreparacion.sh
+Pods antes:
 NAME                                  READY   STATUS    RESTARTS   AGE
-riesgo-credito-api-76f8cd64ff-2hgdh   1/1     Running   0          46s
-riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          66s
-riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          54s
-
-$ kubectl delete pod riesgo-credito-api-76f8cd64ff-2hgdh -n riesgo-credito
-pod "riesgo-credito-api-76f8cd64ff-2hgdh" deleted from riesgo-credito namespace
-
-$ for i in 1 2 3 4 5 6; do printf 'peticion %d -> ' $i; curl -s -X POST http://localhost:30080/predecir -H 'Content-Type: application/json' -d '{"LIMIT_BAL":20000,"SEX":1,"EDUCATION":3,"MARRIAGE":1,"AGE":45,"PAY_0":3,"PAY_2":2,"PAY_3":2,"PAY_4":2,"PAY_5":2,"PAY_6":2,"BILL_AMT1":19500,"BILL_AMT2":19000,"BILL_AMT3":18800,"BILL_AMT4":18500,"BILL_AMT5":18200,"BILL_AMT6":18000,"PAY_AMT1":0,"PAY_AMT2":0,"PAY_AMT3":500,"PAY_AMT4":0,"PAY_AMT5":0,"PAY_AMT6":0}' | sed -E 's/.*"pod":"([^"]+)".*/\1/'; echo; sleep 1; done
-peticion 1 -> riesgo-credito-api-76f8cd64ff-fxtwc
-peticion 2 -> riesgo-credito-api-76f8cd64ff-fxtwc
-peticion 3 -> riesgo-credito-api-76f8cd64ff-fxtwc
-peticion 4 -> riesgo-credito-api-76f8cd64ff-7rlv9
-peticion 5 -> riesgo-credito-api-76f8cd64ff-7rlv9
-peticion 6 -> riesgo-credito-api-76f8cd64ff-7rlv9
-
-$ kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
+riesgo-credito-api-7fdfb4b46f-gldcz   1/1     Running   0          30s
+riesgo-credito-api-7fdfb4b46f-qmw8c   1/1     Running   0          14s
+riesgo-credito-api-7fdfb4b46f-x49qk   1/1     Running   0          22s
+Se eliminara: riesgo-credito-api-7fdfb4b46f-gldcz (mientras llegan peticiones cada 0,5 s)
+01:42:09  peticion  1  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-gldcz
+01:42:10  peticion  2  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-x49qk
+01:42:10  peticion  3  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:11  >>> kubectl delete pod riesgo-credito-api-7fdfb4b46f-gldcz --wait=false
+pod "riesgo-credito-api-7fdfb4b46f-gldcz" deleted from riesgo-credito namespace
+01:42:11  peticion  4  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:12  peticion  5  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:13  peticion  6  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:14  peticion  7  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+NAME                                  READY   STATUS              RESTARTS   AGE
+riesgo-credito-api-7fdfb4b46f-fzp2l   0/1     ContainerCreating   0          3s
+riesgo-credito-api-7fdfb4b46f-qmw8c   1/1     Running             0          20s
+riesgo-credito-api-7fdfb4b46f-x49qk   1/1     Running             0          28s
+01:42:15  peticion  8  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:15  peticion  9  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:16  peticion 10  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:17  peticion 11  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:18  peticion 12  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:18  peticion 13  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-x49qk
+01:42:19  peticion 14  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:20  peticion 15  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:20  peticion 16  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:21  peticion 17  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:22  peticion 18  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-fzp2l
+01:42:23  peticion 19  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-x49qk
+01:42:23  peticion 20  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:24  peticion 21  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+01:42:25  peticion 22  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-fzp2l
+01:42:26  peticion 23  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-fzp2l
+01:42:26  peticion 24  HTTP 200  -> riesgo-credito-api-7fdfb4b46f-qmw8c
+Pods despues:
 NAME                                  READY   STATUS    RESTARTS   AGE
-riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          77s
-riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          65s
-riesgo-credito-api-76f8cd64ff-w2ghl   1/1     Running   0          10s
+riesgo-credito-api-7fdfb4b46f-fzp2l   1/1     Running   0          16s
+riesgo-credito-api-7fdfb4b46f-qmw8c   1/1     Running   0          33s
+riesgo-credito-api-7fdfb4b46f-x49qk   1/1     Running   0          41s
 
-$ sleep 25; kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
+$ sleep 20; kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
 NAME                                  READY   STATUS    RESTARTS   AGE
-riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          103s
-riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          91s
-riesgo-credito-api-76f8cd64ff-w2ghl   1/1     Running   0          36s
+riesgo-credito-api-7fdfb4b46f-fzp2l   1/1     Running   0          36s
+riesgo-credito-api-7fdfb4b46f-qmw8c   1/1     Running   0          53s
+riesgo-credito-api-7fdfb4b46f-x49qk   1/1     Running   0          61s
 
