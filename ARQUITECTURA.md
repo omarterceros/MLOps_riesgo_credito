@@ -72,11 +72,30 @@ y la devuelve el servicio en `/info` y en cada respuesta de `/predecir` (`modelo
 **Dataset real en lugar de Iris.** 23 variables de tres tipos (numéricas, categóricas,
 ordinales) permiten un escenario de drift realista y una prueba estadística por tipo.
 
-**Ocho runs, de lo simple a lo complejo.** Tres regresiones logísticas (C = 0.01, 0.1, 1), dos
-random forest y tres hist gradient boosting, todos sobre la misma partición y con las mismas
-métricas, para poder argumentar la elección con la vista de comparación de MLflow y no "porque
-fue el primero que vi". El preprocesamiento (one-hot de SEX/EDUCATION/MARRIAGE y escalado) va
-dentro del pipeline, así lo que se empaqueta es el modelo completo.
+**Ocho runs en escalera, de lo simple a lo complejo.** La elección de la técnica sigue el criterio
+del módulo: el dato decide la familia (tabla con etiqueta → logística → bosque → boosting; las
+redes no ganan en tablas de este tamaño, Grinsztajn et al., 2022), la pregunta decide la tarea y la
+métrica (¿sí o no? → clasificación; roc_auc y pr_auc, no la exactitud, que se infla con el 78 % de
+no morosos) y la restricción decide antes que la precisión (explicar la decisión de crédito,
+responder en milisegundos sin GPU, clase minoritaria del 22 %). Cada escalón se sube solo si gana
+al anterior en la métrica principal sobre la misma partición de prueba: el modelo correcto es el
+más simple que gana.
+
+| Escalón | Modelo (runs) | Por qué se probó | roc_auc | pr_auc | Decisión |
+|---|---|---|---|---|---|
+| Línea base trivial | clase mayoritaria | rival mínimo: exactitud 0,78 sin servir para nada | 0,500 | 0,221 | — |
+| 1 · línea base | regresión logística, C = 0.01 / 0.1 / 1 | obligatoria en toda clasificación: probabilidad e interpretación; tres órdenes de magnitud de C para mostrar que el techo es la linealidad, no la regularización | 0,710 | 0,495 | versión 1 `baseline` (rollback) |
+| 2 · modelo sólido | random forest, 100 árboles/prof. 8 y 200/prof. 12 | escalón 2 por defecto en tablas: no linealidades e interacciones casi sin ajustar; dos tamaños para ver que crecer ya no aporta (0,7734 → 0,7739) | 0,774 | 0,556 | gana con claridad (+0,064): se sube |
+| 3 · modelo exigente | hist gradient boosting, lr 0.05/0.1, 200/400 it., prof. 4 | solo porque el bosque ganó y quedaba margen; variante *hist* (histogramas, como LightGBM) por latencia; early stopping automático | 0,780 | 0,557 | gana por poco en ambas y entrena en 0,4 s: versión 2 `champion` |
+| Descartados | MLP / deep learning; KNN, Naive Bayes, SVM con kernel, árbol único | no son escalón de la escalera tabular, no escalan a 24.000 filas o no ganan a los árboles | — | — | no evaluados |
+
+Dentro de cada familia las diferencias son de milésimas y entre familias de centésimas: la
+familia pesa más que el ajuste fino. El paso del bosque al boosting está dentro del error de
+muestreo (~0,007 con 6.000 clientes) y se declara como tal: el bosque sería igualmente
+defendible. Todos los runs comparten partición y métricas para poder argumentar la elección con la
+vista de comparación de MLflow y no "porque fue el primero que vi". El preprocesamiento (one-hot
+de SEX/EDUCATION/MARRIAGE y escalado) va dentro del pipeline, así lo que se empaqueta es el
+modelo completo.
 
 **Champion / challenger con alias.** MLflow 3 recomienda alias en lugar de *stages*. La versión 1
 (`baseline`, regresión logística) es la referencia contra la que se compara todo y la versión a
