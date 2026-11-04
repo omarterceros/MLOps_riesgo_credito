@@ -1,0 +1,59 @@
+$ docker build -t riesgo-credito-api:1.0 .
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 30B 0.1s
+#1 transferring dockerfile: 906B 0.1s done
+#1 DONE 0.2s
+
+#2 [internal] load metadata for docker.io/library/python:3.13-slim
+#2 DONE 1.6s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 166B 0.0s done
+#3 DONE 0.1s
+
+#4 [1/7] FROM docker.io/library/python:3.13-slim@sha256:ae14d4ce8771606477a81446e7ef429edd6762305fc50c84507c1041fa8285d1
+#4 resolve docker.io/library/python:3.13-slim@sha256:ae14d4ce8771606477a81446e7ef429edd6762305fc50c84507c1041fa8285d1 0.1s done
+#4 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 660B done
+#5 DONE 0.0s
+
+#6 [4/7] RUN pip install --no-cache-dir -r requirements-servicio.txt
+#6 CACHED
+
+#7 [5/7] COPY comun/ comun/
+#7 CACHED
+
+#8 [6/7] COPY servicio/ servicio/
+#8 CACHED
+
+#9 [2/7] WORKDIR /app
+#9 CACHED
+
+#10 [3/7] COPY requirements-servicio.txt .
+#10 CACHED
+
+#11 [7/7] RUN useradd --create-home appuser && chown -R appuser:appuser /app
+#11 CACHED
+
+#12 exporting to image
+#12 exporting layers 0.0s done
+#12 exporting manifest sha256:c175c7d4e0c225045dc6dd099b18dfaac90df8decc5f44cb7f55e235bbfe6946 done
+#12 exporting config sha256:e147d401e3407640db27771fd63ab40cae7b88830fac29adf9038fa523809368 0.0s done
+#12 exporting attestation manifest sha256:db11fb1ee02a11242a7543ec0ce1c91c19f107e38475fbc7d13801aab1bf5e84
+#12 exporting attestation manifest sha256:db11fb1ee02a11242a7543ec0ce1c91c19f107e38475fbc7d13801aab1bf5e84 0.1s done
+#12 exporting manifest list sha256:816e06abf74dd62dd98bac2934f72ebfebcd2714081783d92af9ea96be8c162c 0.0s done
+#12 naming to docker.io/library/riesgo-credito-api:1.0 done
+#12 unpacking to docker.io/library/riesgo-credito-api:1.0
+#12 unpacking to docker.io/library/riesgo-credito-api:1.0 0.0s done
+#12 DONE 0.3s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/87w3htufuk8o9swru2bwazjxv
+
+$ docker images riesgo-credito-api
+REPOSITORY           TAG       IMAGE ID       CREATED          SIZE
+riesgo-credito-api   1.0       816e06abf74d   20 minutes ago   1.3GB
+

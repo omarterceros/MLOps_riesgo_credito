@@ -1,0 +1,33 @@
+$ pytest -v
+============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.2.0, pluggy-1.7.0 -- C:\Personal\maestria\thesis\modulos\Modulo14\sem4\class1\riesgo-credito-mlops\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Personal\maestria\thesis\modulos\Modulo14\sem4\class1\riesgo-credito-mlops
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.16.0, timeout-2.4.0
+collecting ... collected 20 items
+
+tests/test_api.py::test_health_ok_con_modelo_cargado PASSED              [  5%]
+tests/test_api.py::test_health_503_sin_modelo PASSED                     [ 10%]
+tests/test_api.py::test_predecir_bajo_riesgo PASSED                      [ 15%]
+tests/test_api.py::test_predecir_alto_riesgo PASSED                      [ 20%]
+tests/test_api.py::test_rechaza_valores_invalidos PASSED                 [ 25%]
+tests/test_api.py::test_rechaza_campos_faltantes PASSED                  [ 30%]
+tests/test_api.py::test_esquema_expone_las_23_variables PASSED           [ 35%]
+tests/test_concept_drift.py::test_detectar_sin_caida_no_alarma PASSED    [ 40%]
+tests/test_concept_drift.py::test_detectar_exige_caida_sostenida PASSED  [ 45%]
+tests/test_concept_drift.py::test_detectar_caida_critica_es_inmediata PASSED [ 50%]
+tests/test_concept_drift.py::test_sin_cambio_de_regla_no_hay_alarma PASSED [ 55%]
+tests/test_concept_drift.py::test_con_regla_nueva_la_alarma_salta PASSED [ 60%]
+tests/test_concept_drift.py::test_el_concept_drift_no_se_ve_en_las_entradas PASSED [ 65%]
+tests/test_data_drift.py::test_psi_es_cero_si_las_distribuciones_son_iguales PASSED [ 70%]
+tests/test_data_drift.py::test_psi_crece_con_el_cambio PASSED            [ 75%]
+tests/test_data_drift.py::test_lote_del_mismo_origen_da_verde PASSED     [ 80%]
+tests/test_data_drift.py::test_lote_con_drift_inyectado_da_rojo PASSED   [ 85%]
+tests/test_data_drift.py::test_cada_tipo_de_variable_usa_su_prueba PASSED [ 90%]
+tests/test_data_drift.py::test_un_desplazamiento_pequeno_no_es_rojo PASSED [ 95%]
+tests/test_lote_produccion.py::test_el_lote_no_tiene_data_drift PASSED   [100%]
+
+============================= 20 passed in 4.93s ==============================
+

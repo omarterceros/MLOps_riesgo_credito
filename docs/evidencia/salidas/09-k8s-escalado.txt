@@ -1,0 +1,43 @@
+$ kubectl scale deployment riesgo-credito-api -n riesgo-credito --replicas=5
+deployment.apps/riesgo-credito-api scaled
+
+$ kubectl rollout status deployment/riesgo-credito-api -n riesgo-credito --timeout=300s
+Waiting for deployment "riesgo-credito-api" rollout to finish: 3 of 5 updated replicas are available...
+Waiting for deployment "riesgo-credito-api" rollout to finish: 4 of 5 updated replicas are available...
+deployment "riesgo-credito-api" successfully rolled out
+
+$ kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
+NAME                                  READY   STATUS    RESTARTS   AGE
+riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          115s
+riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          103s
+riesgo-credito-api-76f8cd64ff-g2jsj   1/1     Running   0          12s
+riesgo-credito-api-76f8cd64ff-w2ghl   1/1     Running   0          48s
+riesgo-credito-api-76f8cd64ff-wmnjr   1/1     Running   0          12s
+
+$ bash scripts/demo_balanceo.sh 10
+peticion  1 -> riesgo-credito-api-76f8cd64ff-7rlv9  (probabilidad_mora=0.1078)
+peticion  2 -> riesgo-credito-api-76f8cd64ff-wmnjr  (probabilidad_mora=0.1078)
+peticion  3 -> riesgo-credito-api-76f8cd64ff-w2ghl  (probabilidad_mora=0.1078)
+peticion  4 -> riesgo-credito-api-76f8cd64ff-wmnjr  (probabilidad_mora=0.1078)
+peticion  5 -> riesgo-credito-api-76f8cd64ff-wmnjr  (probabilidad_mora=0.1078)
+peticion  6 -> riesgo-credito-api-76f8cd64ff-g2jsj  (probabilidad_mora=0.1078)
+peticion  7 -> riesgo-credito-api-76f8cd64ff-fxtwc  (probabilidad_mora=0.1078)
+peticion  8 -> riesgo-credito-api-76f8cd64ff-w2ghl  (probabilidad_mora=0.1078)
+peticion  9 -> riesgo-credito-api-76f8cd64ff-fxtwc  (probabilidad_mora=0.1078)
+peticion 10 -> riesgo-credito-api-76f8cd64ff-w2ghl  (probabilidad_mora=0.1078)
+---
+3 peticiones atendidas por riesgo-credito-api-76f8cd64ff-w2ghl
+2 peticiones atendidas por riesgo-credito-api-76f8cd64ff-fxtwc
+1 peticiones atendidas por riesgo-credito-api-76f8cd64ff-g2jsj
+3 peticiones atendidas por riesgo-credito-api-76f8cd64ff-wmnjr
+1 peticiones atendidas por riesgo-credito-api-76f8cd64ff-7rlv9
+
+$ kubectl scale deployment riesgo-credito-api -n riesgo-credito --replicas=3
+deployment.apps/riesgo-credito-api scaled
+
+$ sleep 8; kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
+NAME                                  READY   STATUS    RESTARTS   AGE
+riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          2m7s
+riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          115s
+riesgo-credito-api-76f8cd64ff-w2ghl   1/1     Running   0          60s
+

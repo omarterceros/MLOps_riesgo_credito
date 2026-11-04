@@ -1,0 +1,24 @@
+$ python monitoreo/concept_drift.py; echo "codigo de salida: $?"
+Champion: version 2 (run f8dfebea1f6846ae8d62e0aca7711214, hgb_lr0.1_400it_prof4), roc_auc de referencia 0.7797
+
+Criterio: caida > 0.05 durante 3 lotes seguidos (o > 0.12 en uno). Umbral = 0.7297
+
+ lote   n  roc_auc     f1  tasa_mora_real  tasa_positivos_predicha  prob_media  psi_score  bajo_umbral  regla_nueva
+    1 500   0.7861 0.4914           0.228                    0.122      0.2187     0.0152        False        False
+    2 500   0.7446 0.4183           0.182                    0.124      0.2211     0.0183        False        False
+    3 500   0.7902 0.5158           0.252                    0.128      0.2278     0.0253        False        False
+    4 500   0.7628 0.3758           0.228                    0.102      0.2176     0.0082        False        False
+    5 500   0.7720 0.5081           0.252                    0.118      0.2269     0.0221        False        False
+    6 500   0.8039 0.4831           0.230                    0.126      0.2249     0.0063        False        False
+    7 500   0.7152 0.3895           0.264                    0.116      0.2148     0.0181         True         True
+    8 500   0.7069 0.4124           0.276                    0.112      0.2186     0.0155         True         True
+    9 500   0.7101 0.4128           0.306                    0.130      0.2290     0.0091         True         True
+   10 500   0.6550 0.3944           0.294                    0.132      0.2261     0.0067         True         True
+   11 500   0.6106 0.2589           0.342                    0.106      0.2143     0.0067         True         True
+   12 500   0.6018 0.3197           0.408                    0.130      0.2217     0.0049         True         True
+
+ALARMA DE CONCEPT DRIFT en el lote 9: se dispara el reentrenamiento (challenger).
+Senal sin etiqueta (PSI del score >= 0.1): ninguna -> el drift de concepto puro no se ve en las entradas ni en los scores.
+Grafica: C:\Personal\maestria\thesis\modulos\Modulo14\sem4\class1\riesgo-credito-mlops\monitoreo\salidas\concept_drift.png
+codigo de salida: 1
+

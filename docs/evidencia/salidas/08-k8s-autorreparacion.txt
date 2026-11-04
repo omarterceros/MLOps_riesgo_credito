@@ -1,0 +1,29 @@
+$ kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
+NAME                                  READY   STATUS    RESTARTS   AGE
+riesgo-credito-api-76f8cd64ff-2hgdh   1/1     Running   0          46s
+riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          66s
+riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          54s
+
+$ kubectl delete pod riesgo-credito-api-76f8cd64ff-2hgdh -n riesgo-credito
+pod "riesgo-credito-api-76f8cd64ff-2hgdh" deleted from riesgo-credito namespace
+
+$ for i in 1 2 3 4 5 6; do printf 'peticion %d -> ' $i; curl -s -X POST http://localhost:30080/predecir -H 'Content-Type: application/json' -d '{"LIMIT_BAL":20000,"SEX":1,"EDUCATION":3,"MARRIAGE":1,"AGE":45,"PAY_0":3,"PAY_2":2,"PAY_3":2,"PAY_4":2,"PAY_5":2,"PAY_6":2,"BILL_AMT1":19500,"BILL_AMT2":19000,"BILL_AMT3":18800,"BILL_AMT4":18500,"BILL_AMT5":18200,"BILL_AMT6":18000,"PAY_AMT1":0,"PAY_AMT2":0,"PAY_AMT3":500,"PAY_AMT4":0,"PAY_AMT5":0,"PAY_AMT6":0}' | sed -E 's/.*"pod":"([^"]+)".*/\1/'; echo; sleep 1; done
+peticion 1 -> riesgo-credito-api-76f8cd64ff-fxtwc
+peticion 2 -> riesgo-credito-api-76f8cd64ff-fxtwc
+peticion 3 -> riesgo-credito-api-76f8cd64ff-fxtwc
+peticion 4 -> riesgo-credito-api-76f8cd64ff-7rlv9
+peticion 5 -> riesgo-credito-api-76f8cd64ff-7rlv9
+peticion 6 -> riesgo-credito-api-76f8cd64ff-7rlv9
+
+$ kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
+NAME                                  READY   STATUS    RESTARTS   AGE
+riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          77s
+riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          65s
+riesgo-credito-api-76f8cd64ff-w2ghl   1/1     Running   0          10s
+
+$ sleep 25; kubectl get pods -n riesgo-credito -l app=riesgo-credito-api
+NAME                                  READY   STATUS    RESTARTS   AGE
+riesgo-credito-api-76f8cd64ff-7rlv9   1/1     Running   0          103s
+riesgo-credito-api-76f8cd64ff-fxtwc   1/1     Running   0          91s
+riesgo-credito-api-76f8cd64ff-w2ghl   1/1     Running   0          36s
+

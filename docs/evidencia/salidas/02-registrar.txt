@@ -1,0 +1,9 @@
+$ python entrenamiento/registrar.py
+Modelo registrado: 'riesgo-credito'
+ version  alias     run_name                  roc_auc  run_id
+       1  baseline  logreg_C1                  0.7100  80c50ee4bf67469b9b94c6ee97c5c0a1
+       2  champion  hgb_lr0.1_400it_prof4      0.7797  f8dfebea1f6846ae8d62e0aca7711214
+
+El servicio consume: models:/riesgo-credito@champion  ->  version 2, run f8dfebea1f6846ae8d62e0aca7711214
+Referencia escrita en entrenamiento\modelo_desplegado.json
+

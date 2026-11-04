@@ -1,0 +1,18 @@
+$ bash scripts/demo_balanceo.sh 12
+peticion  1 -> riesgo-credito-api-76f8cd64ff-7rlv9  (probabilidad_mora=0.1078)
+peticion  2 -> riesgo-credito-api-76f8cd64ff-fxtwc  (probabilidad_mora=0.1078)
+peticion  3 -> riesgo-credito-api-76f8cd64ff-fxtwc  (probabilidad_mora=0.1078)
+peticion  4 -> riesgo-credito-api-76f8cd64ff-2hgdh  (probabilidad_mora=0.1078)
+peticion  5 -> riesgo-credito-api-76f8cd64ff-fxtwc  (probabilidad_mora=0.1078)
+peticion  6 -> riesgo-credito-api-76f8cd64ff-fxtwc  (probabilidad_mora=0.1078)
+peticion  7 -> riesgo-credito-api-76f8cd64ff-7rlv9  (probabilidad_mora=0.1078)
+peticion  8 -> riesgo-credito-api-76f8cd64ff-2hgdh  (probabilidad_mora=0.1078)
+peticion  9 -> riesgo-credito-api-76f8cd64ff-7rlv9  (probabilidad_mora=0.1078)
+peticion 10 -> riesgo-credito-api-76f8cd64ff-fxtwc  (probabilidad_mora=0.1078)
+peticion 11 -> riesgo-credito-api-76f8cd64ff-fxtwc  (probabilidad_mora=0.1078)
+peticion 12 -> riesgo-credito-api-76f8cd64ff-2hgdh  (probabilidad_mora=0.1078)
+---
+6 peticiones atendidas por riesgo-credito-api-76f8cd64ff-fxtwc
+3 peticiones atendidas por riesgo-credito-api-76f8cd64ff-2hgdh
+3 peticiones atendidas por riesgo-credito-api-76f8cd64ff-7rlv9
+

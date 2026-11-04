@@ -1,0 +1,58 @@
+$ pytest tests/test_lote_produccion.py --lote monitoreo/lotes/lote_normal.csv -q
+.                                                                        [100%]
+1 passed in 0.34s
+
+$ pytest tests/test_lote_produccion.py --lote monitoreo/lotes/lote_derivado.csv -q
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________________ test_el_lote_no_tiene_data_drift _______________________
+
+request = <FixtureRequest for <Function test_el_lote_no_tiene_data_drift>>
+referencia =        LIMIT_BAL  SEX  EDUCATION  ...  PAY_AMT4  PAY_AMT5  PAY_AMT6
+22788     160000    2          2  ...      6100   ...   0         0         0
+27126     300000    1          1  ...         0         0         0
+
+[24000 rows x 23 columns]
+
+    def test_el_lote_no_tiene_data_drift(request, referencia):
+        ruta = request.config.getoption("--lote")
+        lote = pd.read_csv(ruta)
+        tabla, estado = evaluar_lote(referencia, lote)
+        print(f"\nLote evaluado: {ruta} ({len(lote)} filas)\n{formatear(tabla)}\n{resumen(tabla, estado)}")
+        if estado == "rojo":
+>           pytest.fail(f"DATA DRIFT en {ruta}: {resumen(tabla, estado)}")
+E           Failed: DATA DRIFT en monitoreo/lotes/lote_derivado.csv: ESTADO DEL LOTE: ROJO | 5 variable(s) con drift: LIMIT_BAL, EDUCATION, AGE, PAY_0, BILL_AMT1
+
+tests\test_lote_produccion.py:21: Failed
+---------------------------- Captured stdout call -----------------------------
+
+Lote evaluado: monitoreo/lotes/lote_derivado.csv (1500 filas)
+ variable       tipo     prueba estadistico  p_valor   psi estado                 detalle
+LIMIT_BAL   numerica   KS + PSI       0.263 1.28e-86 0.822   ROJO media 167,365 -> 99,984
+      SEX categorica chi2 + PSI       0.006    0.316 0.001  VERDE moda 2 (60%) -> 2 (59%)
+EDUCATION categorica chi2 + PSI       0.254 0.00e+00 0.831   ROJO moda 2 (47%) -> 3 (58%)
+ MARRIAGE categorica chi2 + PSI       0.006    0.815 0.001  VERDE moda 2 (53%) -> 2 (52%)
+      AGE   numerica   KS + PSI       0.508 0.00e+00 3.564   ROJO          media 35 -> 48
+    PAY_0    ordinal chi2 + PSI       0.127 1.33e-85 0.211   ROJO moda 0 (49%) -> 0 (39%)
+    PAY_2    ordinal chi2 + PSI       0.011    0.680 0.002  VERDE moda 0 (52%) -> 0 (53%)
+    PAY_3    ordinal chi2 + PSI       0.015    0.228 0.004  VERDE moda 0 (53%) -> 0 (53%)
+    PAY_4    ordinal chi2 + PSI       0.016    0.146 0.004  VERDE moda 0 (55%) -> 0 (55%)
+    PAY_5    ordinal chi2 + PSI       0.018    0.092 0.006  VERDE moda 0 (56%) -> 0 (57%)
+    PAY_6    ordinal chi2 + PSI       0.018    0.080 0.006  VERDE moda 0 (54%) -> 0 (56%)
+BILL_AMT1   numerica   KS + PSI       0.183 4.39e-42 0.189   ROJO  media 51,101 -> 95,933
+BILL_AMT2   numerica   KS + PSI       0.038    0.036 0.005  VERDE  media 49,012 -> 52,220
+BILL_AMT3   numerica   KS + PSI       0.038    0.032 0.008  VERDE  media 46,862 -> 49,793
+BILL_AMT4   numerica   KS + PSI       0.039    0.025 0.008  VERDE  media 43,157 -> 45,474
+BILL_AMT5   numerica   KS + PSI       0.028    0.209 0.004  VERDE  media 40,164 -> 42,007
+BILL_AMT6   numerica   KS + PSI       0.036    0.053 0.006  VERDE  media 38,676 -> 40,813
+ PAY_AMT1   numerica   KS + PSI       0.033    0.085 0.006  VERDE    media 5,624 -> 6,139
+ PAY_AMT2   numerica   KS + PSI       0.016    0.867 0.005  VERDE    media 5,880 -> 6,654
+ PAY_AMT3   numerica   KS + PSI       0.026    0.301 0.005  VERDE    media 5,216 -> 5,162
+ PAY_AMT4   numerica   KS + PSI       0.037    0.044 0.010  VERDE    media 4,790 -> 4,099
+ PAY_AMT5   numerica   KS + PSI       0.027    0.260 0.002  VERDE    media 4,770 -> 4,369
+ PAY_AMT6   numerica   KS + PSI       0.036    0.050 0.010  VERDE    media 5,230 -> 5,539
+ESTADO DEL LOTE: ROJO | 5 variable(s) con drift: LIMIT_BAL, EDUCATION, AGE, PAY_0, BILL_AMT1
+=========================== short test summary info ===========================
+FAILED tests/test_lote_produccion.py::test_el_lote_no_tiene_data_drift - Fail...
+1 failed in 0.60s
+

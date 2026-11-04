@@ -1,0 +1,32 @@
+$ python entrenamiento/entrenar.py
+2026/11/04 01:12:21 INFO mlflow.tracking.fluent: Experiment with name 'riesgo-credito' does not exist. Creating a new experiment.
+Datos: 30000 filas, md5 a4963930271a5ae46fb801ca0cba130b. Train 24000 / test 6000 (semilla 42).
+  logreg_C0.01             roc_auc=0.7080  f1=0.3527  acc=0.8085  (0.1 s)
+ View run logreg_C0.01 at: http://127.0.0.1:5050/#/experiments/1/runs/b04d75eeea3348d08249eb037a89c1a4
+  logreg_C0.1              roc_auc=0.7097  f1=0.3616  acc=0.8093  (0.2 s)
+ View run logreg_C0.1 at: http://127.0.0.1:5050/#/experiments/1/runs/09079a26b23641cd8ca11b885eaf8033
+  logreg_C1                roc_auc=0.7100  f1=0.3610  acc=0.8088  (0.1 s)
+ View run logreg_C1 at: http://127.0.0.1:5050/#/experiments/1/runs/80c50ee4bf67469b9b94c6ee97c5c0a1
+  rf_100arboles_prof8      roc_auc=0.7734  f1=0.4477  acc=0.8162  (0.5 s)
+ View run rf_100arboles_prof8 at: http://127.0.0.1:5050/#/experiments/1/runs/007e443a4a2943edb9e13f416e5642d0
+  rf_200arboles_prof12     roc_auc=0.7739  f1=0.4593  acc=0.8172  (1.5 s)
+ View run rf_200arboles_prof12 at: http://127.0.0.1:5050/#/experiments/1/runs/69ae17a866a346b78b72c57862b24e6d
+  hgb_lr0.05_200it         roc_auc=0.7778  f1=0.4730  acc=0.8177  (3.6 s)
+ View run hgb_lr0.05_200it at: http://127.0.0.1:5050/#/experiments/1/runs/37040b0631044c51826b1a7532478e8a
+  hgb_lr0.1_200it          roc_auc=0.7768  f1=0.4677  acc=0.8172  (0.6 s)
+ View run hgb_lr0.1_200it at: http://127.0.0.1:5050/#/experiments/1/runs/262bd88c14e445e9a0ca9774b4682435
+  hgb_lr0.1_400it_prof4    roc_auc=0.7797  f1=0.4693  acc=0.8187  (0.4 s)
+ View run hgb_lr0.1_400it_prof4 at: http://127.0.0.1:5050/#/experiments/1/runs/f8dfebea1f6846ae8d62e0aca7711214
+
+Runs ordenados por roc_auc (metrica principal):
+             run_name                familia  roc_auc   pr_auc       f1  accuracy  segundos                           run_id
+hgb_lr0.1_400it_prof4 hist_gradient_boosting 0.779742 0.556771 0.469268  0.818667       0.4 f8dfebea1f6846ae8d62e0aca7711214
+     hgb_lr0.05_200it hist_gradient_boosting 0.777770 0.553084 0.473025  0.817667       3.6 37040b0631044c51826b1a7532478e8a
+      hgb_lr0.1_200it hist_gradient_boosting 0.776754 0.550060 0.467734  0.817167       0.6 262bd88c14e445e9a0ca9774b4682435
+ rf_200arboles_prof12          random_forest 0.773858 0.556313 0.459340  0.817167       1.5 69ae17a866a346b78b72c57862b24e6d
+  rf_100arboles_prof8          random_forest 0.773361 0.553026 0.447672  0.816167       0.5 007e443a4a2943edb9e13f416e5642d0
+            logreg_C1    regresion_logistica 0.710034 0.494777 0.361003  0.808833       0.1 80c50ee4bf67469b9b94c6ee97c5c0a1
+          logreg_C0.1    regresion_logistica 0.709728 0.494884 0.361607  0.809333       0.2 09079a26b23641cd8ca11b885eaf8033
+         logreg_C0.01    regresion_logistica 0.708035 0.493316 0.352676  0.808500       0.1 b04d75eeea3348d08249eb037a89c1a4
+
+Mejor run: hgb_lr0.1_400it_prof4 (f8dfebea1f6846ae8d62e0aca7711214) roc_auc=0.7797
